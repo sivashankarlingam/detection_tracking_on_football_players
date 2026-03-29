@@ -47,6 +47,7 @@ urlpatterns = [
     path('AdminHome', mainView.adminhome, name='AdminHome'),
   
     # admin views
+    path('force_migrate/', admins.force_migrate, name='force_migrate'),
     path("AdminLogincheck", admins.AdminLoginCheck, name="AdminLoginCheck"),
     path('userDetails', admins.RegisterUsersView, name='RegisterUsersView'),
     path('ActivUsers/', admins.ActivaUsers, name='activate_users'),
