@@ -20,13 +20,8 @@ def AdminLoginCheck(request):
 
 
 def RegisterUsersView(request):
-    try:
-        data = list(UserRegistrationModel.objects.all())
-        return render(request, 'admins/viewregisterusers.html', context={'data': data})
-    except Exception as e:
-        from django.http import HttpResponse
-        import traceback
-        return HttpResponse(f"<h1>DEBUG TRACEBACK</h1><pre>{traceback.format_exc()}</pre>")
+    data = UserRegistrationModel.objects.all()
+    return render(request, 'admins/viewregisterusers.html', context={'data': data})
 
 
 

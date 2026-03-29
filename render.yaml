@@ -6,7 +6,8 @@ services:
     region: oregon 
     plan: free
     branch: main
-    # releaseCommand: "python manage.py migrate --noinput"
+    # This specifically fixes the UndefinedTable error by creating database tables on Render
+    releaseCommand: "python manage.py migrate --noinput"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -15,7 +16,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
-        value: "True"
+        value: "False"
       - key: PORT
         value: "10000"
 
