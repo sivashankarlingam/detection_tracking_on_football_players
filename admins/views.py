@@ -19,17 +19,6 @@ def AdminLoginCheck(request):
 
 
 
-def force_migrate(request):
-    from django.core.management import call_command
-    import io, traceback
-    from django.http import HttpResponse
-    try:
-        out = io.StringIO()
-        call_command('migrate', interactive=False, stdout=out)
-        return HttpResponse(f"<pre>Migrations Success!\n\n{out.getvalue()}</pre>")
-    except Exception as e:
-        return HttpResponse(f"<pre>Migrations FAILED!\n\n{traceback.format_exc()}</pre>")
-
 def RegisterUsersView(request):
     data = UserRegistrationModel.objects.all()
     return render(request, 'admins/viewregisterusers.html', context={'data': data})
