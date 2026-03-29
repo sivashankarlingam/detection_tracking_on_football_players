@@ -6,8 +6,8 @@ services:
     region: oregon 
     plan: free
     branch: main
-    # This command runs automatically before the site starts
-    buildCommand: "python manage.py collectstatic --noinput && python manage.py migrate --noinput"
+    # This specifically fixes the 500 Server Error by creating database tables
+    releaseCommand: "python manage.py migrate --noinput"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
