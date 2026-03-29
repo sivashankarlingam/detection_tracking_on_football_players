@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contents %}
+<div class="container py-5">
+    <div class="row w-100 justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <div class="glass-panel p-5 text-center fade-in-up">
+                <div class="display-4 fw-bold mb-4 bg-gradient bg-primary text-transparent bg-clip-text" style="background: linear-gradient(135deg, var(--primary-main), var(--primary-dark)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                    Football Player Detection & Tracking
+                </div>
+                
+                <p class="lead mb-5 text-muted fw-medium lh-lg">
+                    Elevate your game with state-of-the-art AI. Upload match footage to instantly detect and track players, calculate personalized speed metrics, monitor distance covered, and generate real-time possession statistics using YOLOv8 & ByteTrack.
+                </p>
+                
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'UserRegisterForm' %}" class="btn btn-glass btn-lg px-5">
+                        Get Started <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                    <a href="{% url 'UserLogin' %}" class="btn btn-outline-primary btn-lg px-5 rounded-4 border-2 fw-semibold" style="border-radius: 12px !important;">
+                        Sign In
+                    </a>
+                </div>
+
+                <div class="row mt-5 pt-4 border-top border-secondary border-opacity-10 px-0">
+                    <div class="col-4 px-1">
+                        <h5 class="fw-bold text-primary mb-1">YOLOv8</h5>
+                        <div class="text-muted fw-semibold text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.05em;">Detection</div>
+                    </div>
+                    <div class="col-4 px-1 border-start border-end border-secondary border-opacity-10">
+                        <h5 class="fw-bold text-primary mb-1">ByteTrack</h5>
+                        <div class="text-muted fw-semibold text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.05em;">Tracking</div>
+                    </div>
+                    <div class="col-4 px-1">
+                        <h5 class="fw-bold text-primary mb-1">Analytics</h5>
+                        <div class="text-muted fw-semibold text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.05em;">Insights</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

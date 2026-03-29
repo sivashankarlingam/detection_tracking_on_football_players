@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Football Player Analysis</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom Glassmorphism CSS -->
+    <link rel="stylesheet" href="{% static 'css/glassmorphism.css' %}">
+    
+    <style>
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 2rem 1.5rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--glass-border);
+            /* Extending .glass-panel directly here for layout purposes */
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            padding: 2rem;
+            width: calc(100% - 280px);
+        }
+        .nav-pills .nav-link {
+            color: var(--primary-dark);
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-pills .nav-link:hover, .nav-pills .nav-link.active {
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--primary-main);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transform: translateX(5px);
+        }
+        .brand-logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-main), var(--primary-dark));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2rem;
+            line-height: 1.2;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+        .nav-icon {
+            font-size: 1.2rem;
+        }
+        .user-profile-widget {
+            background: rgba(255,255,255,0.6);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid var(--glass-border);
+        }
+    </style>
+    <!-- PWA -->
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#1a202c">
+    <link rel="apple-touch-icon" href="{% static 'images/pwa-icon.png' %}">
+</head>
+<body>
+    
+    <!-- Glass Sidebar -->
+    <nav class="sidebar glass-shadow">
+        <a href="{% url 'UserHome' %}" class="brand-logo mb-4 mt-3">
+            <i class="bi bi-activity text-primary"></i><br>
+            Football Player<br>Analysis
+        </a>
+        
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+                <a href="{% url 'UserHome' %}" class="nav-link {% if request.resolver_match.url_name == 'UserHome' %}active{% endif %}">
+                    <i class="bi bi-house-door nav-icon"></i> Dashboard Home
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'prediction' %}" class="nav-link {% if request.resolver_match.url_name == 'prediction' %}active{% endif %}">
+                    <i class="bi bi-camera-video nav-icon"></i> Analyze Video
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'index' %}" class="nav-link mt-4 text-danger bg-white bg-opacity-50">
+                    <i class="bi bi-box-arrow-right nav-icon"></i> Logout
+                </a>
+            </li>
+        </ul>
+        
+        <div class="mt-auto text-center">
+            <!-- Footer removed as per user request -->
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Navigation / Header -->
+        {% if logged_in_user %}
+        <div class="d-flex justify-content-end align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-10">
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end d-none d-md-block">
+                    <div class="fw-bold text-primary-dark" style="line-height:1.2; font-size: 1.05rem;">{{ logged_in_user.name }}</div>
+                    <small class="text-muted" style="font-size: 0.8rem;">{{ logged_in_user.email }}</small>
+                </div>
+                <div class="rounded-circle overflow-hidden border border-2 border-primary border-opacity-25 bg-white shadow-sm" style="width: 48px; height: 48px;">
+                    {% if logged_in_user.profile_image %}
+                        <img src="{{ logged_in_user.profile_image.url }}" alt="Profile" class="w-100 h-100 object-fit-cover">
+                    {% else %}
+                        <img src="https://ui-avatars.com/api/?name={{ logged_in_user.name|urlencode }}&background=e0f2fe&color=0284c7&bold=true&rounded=true" alt="Profile" class="w-100 h-100 object-fit-cover">
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% block contents %}
+        {% endblock %}
+    </main>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
+    <!-- PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful');
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

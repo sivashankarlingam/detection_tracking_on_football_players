@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contents %}
+<div class="container d-flex justify-content-center align-items-center w-100">
+    <div class="glass-panel p-5" style="max-width: 450px; width: 100%;">
+        <div class="text-center mb-4">
+            <div class="d-inline-flex justify-content-center align-items-center bg-danger bg-opacity-10 text-danger rounded-circle mb-3 p-3 shadow-sm">
+                <i class="bi bi-shield-lock-fill fs-2"></i>
+            </div>
+            <h2 class="fw-bold mb-2">Admin Access</h2>
+            <p class="text-muted small">Restricted personnel only</p>
+        </div>
+
+        <form action="{% url 'AdminLoginCheck' %}" method="POST">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label class="form-label small fw-semibold text-muted">Administrator ID</label>
+                <input type="text" class="form-control glass-input" name="loginid" required placeholder="Enter ID">
+            </div>
+            
+            <div class="mb-4">
+                <label class="form-label small fw-semibold text-muted">Password</label>
+                <input type="password" class="form-control glass-input" name="pswd" required placeholder="••••••••">
+            </div>
+            
+            <div class="d-grid gap-2 mt-5">
+                <button class="btn btn-glass bg-danger border-0" type="submit">Verify Identity</button>
+            </div>
+
+            {% if messages %}
+                <div class="mt-4">
+                    {% for message in messages %}
+                        <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-25 text-danger small text-center rounded-3 py-2">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

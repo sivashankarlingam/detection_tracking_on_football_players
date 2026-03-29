@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contents %}
+<div class="container d-flex justify-content-center align-items-center w-100">
+    <div class="glass-panel p-5" style="max-width: 450px; width: 100%;">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold mb-2">Welcome Back</h2>
+            <p class="text-muted small">Enter your credentials to access your dashboard</p>
+        </div>
+
+        <form action="{% url 'UserLoginCheck' %}" method="POST">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label class="form-label small fw-semibold text-muted">Login ID</label>
+                <input type="text" class="form-control glass-input" name="loginid" required placeholder="Enter your ID">
+            </div>
+            
+            <div class="mb-4">
+                <label class="form-label small fw-semibold text-muted">Password</label>
+                <input type="password" class="form-control glass-input" name="pswd" required placeholder="••••••••">
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button class="btn btn-glass" type="submit">Sign In</button>
+            </div>
+
+            {% if messages %}
+                <div class="mt-4">
+                    {% for message in messages %}
+                        <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-25 text-success small text-center rounded-3 py-2">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <div class="text-center mt-4">
+                <p class="small text-muted">Don't have an account? <a href="{% url 'UserRegisterForm' %}" class="text-primary text-decoration-none fw-semibold">Sign up</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

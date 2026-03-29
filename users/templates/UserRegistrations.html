@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contents %}
+<div class="container py-5 d-flex justify-content-center">
+    <div class="glass-panel p-5" style="max-width: 600px; width: 100%;">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold mb-2">Create Account</h2>
+            <p class="text-muted small">Join the next-gen football analytics platform</p>
+        </div>
+
+        <form action="{% url 'UserRegisterForm' %}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <!-- Profile Image Upload with Preview -->
+            <div class="text-center mb-4">
+                <div class="position-relative d-inline-block">
+                    <img id="profilePreview" src="{% static 'default_profile.png' %}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%20viewBox%3D%220%200%20120%20120%22%3E%3Crect%20fill%3D%22%23e9ecef%22%20width%3D%22120%22%20height%3D%22120%22%2F%3E%3Cpath%20fill%3D%22%23adb5bd%22%20d%3D%22M60%2020a16%2016%200%201%201%200%2032%2016%2016%200%200%201%200-32zm0%2042c18.8%200%2034%2015.2%2034%2034H26c0-18.8%2015.2-34%2034-34z%22%2F%3E%3C%2Fsvg%3E'" class="rounded-circle object-fit-cover shadow-sm bg-white" style="width: 120px; height: 120px; border: 3px solid var(--primary-light);">
+                    <label for="profile_image" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow" style="cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-camera-fill"></i>
+                    </label>
+                    <input type="file" id="profile_image" name="profile_image" class="d-none" accept="image/*" onchange="previewImage(event)">
+                </div>
+                <div class="small text-muted mt-2">Upload Profile Photo</div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-muted">Full Name</label>
+                    <input type="text" class="form-control glass-input" name="name" maxlength="100" required placeholder="John Doe">
+                    <div class="invalid-feedback">Please enter your name.</div>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-muted">Login ID</label>
+                    <input type="text" class="form-control glass-input" name="loginid" maxlength="100" required placeholder="Unique username">
+                    <div class="invalid-feedback">Please choose a login ID.</div>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-muted">Password</label>
+                    <input type="password" class="form-control glass-input" name="password" minlength="6" maxlength="100" required placeholder="••••••••">
+                    <div class="invalid-feedback">Password must be at least 6 characters.</div>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-muted">Email</label>
+                    <input type="email" class="form-control glass-input" name="email" maxlength="100" required placeholder="john@example.com">
+                    <div class="invalid-feedback">Please enter a valid email.</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-muted">Mobile Number</label>
+                    <input type="tel" pattern="[0-9]{10}" class="form-control glass-input" name="mobile" maxlength="10" required placeholder="10 digit number">
+                    <div class="invalid-feedback">Please enter a valid 10-digit number.</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-muted">Locality</label>
+                    <input type="text" class="form-control glass-input" name="locality" maxlength="100" required placeholder="Neighborhood">
+                    <div class="invalid-feedback">Locality is required.</div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label small fw-semibold text-muted">Full Address</label>
+                    <textarea class="form-control glass-input" name="address" maxlength="1000" rows="2" required placeholder="Street address"></textarea>
+                    <div class="invalid-feedback">Please provide your address.</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-muted">City</label>
+                    <input type="text" class="form-control glass-input" name="city" maxlength="100" required>
+                    <div class="invalid-feedback">City is required.</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-muted">State</label>
+                    <input type="text" class="form-control glass-input" name="state" maxlength="100" required>
+                    <div class="invalid-feedback">State is required.</div>
+                </div>
+            </div>
+
+            <div class="d-grid mt-5">
+                <button type="submit" class="btn btn-glass btn-lg">Create Account</button>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p class="small text-muted">Already have an account? <a href="{% url 'UserLogin' %}" class="text-primary text-decoration-none fw-semibold">Sign in here</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Image Preview Function
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            const output = document.getElementById('profilePreview');
+            output.src = reader.result;
+        };
+        if(event.target.files[0]) {
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    }
+
+    // Bootstrap Form Validation
+    (() => {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+{% endblock %}

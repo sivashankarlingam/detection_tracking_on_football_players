@@ -1,0 +1,16 @@
+{
+  "name": "Football AI Tracker",
+  "short_name": "FootyTracker",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a202c",
+  "description": "AI-Powered Football Player Detection and Tracking App",
+  "icons": [
+    {
+      "src": "/static/images/pwa-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

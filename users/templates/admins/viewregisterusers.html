@@ -1,0 +1,183 @@
+{% extends 'admins/adminbase.html' %}
+{% load static %}
+{% block contents %}
+
+<div class="container-fluid py-2">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary-dark m-0">User Management</h2>
+            <p class="text-muted m-0">View, manage, and edit registered platform users</p>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm glass-panel" role="alert" style="background: rgba(220, 252, 231, 0.6);">
+            <i class="bi bi-check-circle-fill me-2 text-success"></i> <strong>{{ message }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="glass-panel p-4 border-0 shadow-sm">
+        <div class="table-responsive">
+            <table id="usersTable" class="table table-hover align-middle mb-0" style="background: transparent;">
+                <thead class="bg-primary bg-opacity-10 text-primary-dark border-bottom border-primary border-opacity-25">
+                    <tr>
+                        <th class="border-0 rounded-start">ID</th>
+                        <th class="border-0">User Info</th>
+                        <th class="border-0">Role / Status</th>
+                        <th class="border-0">Contact</th>
+                        <th class="border-0 text-end rounded-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for i in data %}
+                    <tr class="bg-white bg-opacity-25" style="border-bottom: 1px solid var(--glass-border);">
+                        <td class="fw-bold text-muted" data-sort="{{ forloop.counter }}">#{{ forloop.counter }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <!-- Profile Placeholder or Image -->
+                                {% if i.profile_image %}
+                                <div class="rounded-circle me-3 overflow-hidden border border-2 border-primary border-opacity-25" style="width: 45px; height: 45px;">
+                                    <img src="{{ i.profile_image.url }}" alt="Profile" class="w-100 h-100 object-fit-cover">
+                                </div>
+                                {% else %}
+                                <div class="rounded-circle me-3 overflow-hidden border border-2 border-primary border-opacity-25 shadow-sm" style="width: 45px; height: 45px;">
+                                    <img src="https://ui-avatars.com/api/?name={{ i.name }}&background=e0f2fe&color=0284c7&bold=true&rounded=true" alt="{{ i.name }}" class="w-100 h-100 object-fit-cover">
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold text-primary-dark">{{ i.name }}</div>
+                                    <div class="small text-muted">{{ i.loginid }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if i.status == 'waiting' %}
+                            <span class="badge bg-warning bg-opacity-25 text-warning fw-semibold rounded-pill px-3 py-2 border border-warning border-opacity-25">
+                                <i class="bi bi-hourglass-split me-1"></i> Waiting
+                            </span>
+                            {% else %}
+                            <span class="badge bg-success bg-opacity-25 text-success fw-semibold rounded-pill px-3 py-2 border border-success border-opacity-25">
+                                <i class="bi bi-check-circle me-1"></i> Active
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="small"><i class="bi bi-envelope text-muted me-1"></i> {{ i.email }}</div>
+                            <div class="small"><i class="bi bi-telephone text-muted me-1"></i> {{ i.mobile }}</div>
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2">
+                                {% if i.status == 'waiting' %}
+                                <a href="{% url 'activate_users' %}?uid={{ i.id }}" class="btn btn-outline-success rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center fw-semibold" style="font-size: 0.85rem;">
+                                    <i class="bi bi-check2 me-1"></i> Activate
+                                </a>
+                                {% else %}
+                                <button type="button" class="btn btn-outline-primary rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center fw-semibold" style="font-size: 0.85rem;" title="Edit User" data-bs-toggle="modal" data-bs-target="#editModal{{ i.id }}">
+                                    <i class="bi bi-pencil-fill me-2"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center fw-semibold" style="font-size: 0.85rem;" title="Delete User" data-bs-toggle="modal" data-bs-target="#deleteModal{{ i.id }}">
+                                    <i class="bi bi-trash-fill me-2"></i> Delete
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+
+
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Render Modals Securely Outside the Table DOM -->
+{% for i in data %}
+<!-- Delete Modal for User -->
+<div class="modal fade" id="deleteModal{{ i.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 glass-panel shadow-lg">
+            <div class="modal-body p-5 text-center">
+                <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle mb-4" style="width: 80px; height: 80px;">
+                    <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Delete User Account</h4>
+                <p class="text-muted mb-4">Are you sure you want to permanently delete <strong>{{ i.name }}</strong> ({{ i.loginid }})? This action cannot be undone.</p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
+                    <a href="{% url 'delete_users' %}?uid={{ i.id }}" class="btn btn-danger fw-bold px-4 shadow-sm">Yes, Delete User</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Example Edit Modal -->
+<div class="modal fade" id="editModal{{ i.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 glass-panel shadow-lg">
+            <div class="modal-header border-bottom border-secondary border-opacity-10 py-3">
+                <h5 class="modal-title fw-bold"><i class="bi bi-pencil me-2 text-primary"></i>Edit User Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{% url 'edit_users' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="uid" value="{{ i.id }}">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Full Name</label>
+                        <input type="text" name="name" class="form-control glass-input" value="{{ i.name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Mobile / Contact</label>
+                        <input type="text" name="mobile" class="form-control glass-input" value="{{ i.mobile }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Email</label>
+                        <input type="email" name="email" class="form-control glass-input" value="{{ i.email }}">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold text-muted">Profile Picture <span class="text-muted fw-normal">(Optional)</span></label>
+                        <input type="file" name="profile_image" accept="image/*" class="form-control glass-input">
+                        {% if i.profile_image %}
+                            <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Uploading a new image will replace the current one.</small>
+                        {% endif %}
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-glass">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables
+        $('#usersTable').DataTable({
+            "pageLength": 10,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search users..."
+            },
+            "dom": "<'row mb-3'<'col-md-6'l><'col-md-6 d-flex justify-content-end'f>>" +
+                   "<'row'<'col-sm-12'tr>>" +
+                   "<'row mt-3'<'col-md-5'i><'col-md-7 d-flex justify-content-end'p>>",
+            "drawCallback": function() {
+                $('.dataTables_filter input').addClass('glass-input ms-2');
+                $('.dataTables_length select').addClass('form-select form-select-sm d-inline-block w-auto ms-1 me-1 glass-input');
+            }
+        });
+    });
+</script>
+{% endblock %}
