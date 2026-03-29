@@ -23,7 +23,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-wi-e(!&akyw1gh%i*b(-8u8e_%7_1ax3$lzy2_1-m@qg5v-!w$'
 
 import os
-import dj_database_url
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
@@ -87,6 +86,7 @@ DATABASES = {
 }
 
 if 'DATABASE_URL' in os.environ:
+    import dj_database_url
     DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
 
 

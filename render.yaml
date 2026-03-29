@@ -6,8 +6,7 @@ services:
     region: oregon 
     plan: free
     branch: main
-    # This specifically fixes the 500 Server Error by creating database tables
-    releaseCommand: "python manage.py migrate --noinput"
+    # releaseCommand: "python manage.py migrate --noinput"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
