@@ -4,162 +4,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard - Football Player Analysis</title>
-    <!-- Google Fonts -->
+    <title>Dashboard — FP Track</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5 CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Custom Glassmorphism CSS -->
-    <link rel="stylesheet" href="{% static 'css/glassmorphism.css' %}">
-    
-    <style>
-        .sidebar {
-            width: 280px;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            padding: 2rem 1.5rem;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--glass-border);
-            /* Extending .glass-panel directly here for layout purposes */
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-        .main-content {
-            margin-left: 280px;
-            min-height: 100vh;
-            padding: 2rem;
-            width: calc(100% - 280px);
-        }
-        .nav-pills .nav-link {
-            color: var(--primary-dark);
-            border-radius: 12px;
-            padding: 0.8rem 1.2rem;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .nav-pills .nav-link:hover, .nav-pills .nav-link.active {
-            background: rgba(255, 255, 255, 0.8);
-            color: var(--primary-main);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            transform: translateX(5px);
-        }
-        .brand-logo {
-            font-weight: 800;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, var(--primary-main), var(--primary-dark));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 2rem;
-            line-height: 1.2;
-            text-align: center;
-            text-decoration: none;
-            display: block;
-        }
-        .nav-icon {
-            font-size: 1.2rem;
-        }
-        .user-profile-widget {
-            background: rgba(255,255,255,0.6);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border: 1px solid var(--glass-border);
-        }
-    </style>
-    <!-- PWA -->
     <link rel="manifest" href="{% static 'manifest.json' %}">
-    <meta name="theme-color" content="#1a202c">
-    <link rel="apple-touch-icon" href="{% static 'images/pwa-icon.png' %}">
+    <meta name="theme-color" content="#050d1f">
+    <style>
+        :root {
+            --blue:       #3b82f6;
+            --blue-lt:    #60a5fa;
+            --blue-dk:    #1d4ed8;
+            --blue-dim:   rgba(59,130,246,0.10);
+            --blue-glow:  rgba(59,130,246,0.32);
+            --cyan:       #38bdf8;
+            --cyan-dim:   rgba(56,189,248,0.10);
+            --green:      #22c55e;
+            --green-dim:  rgba(34,197,94,0.10);
+            --navy:       #050d1f;
+            --navy-2:     #0a1628;
+            --navy-3:     #0f1f3d;
+            --glass-bg:   rgba(10,22,40,0.80);
+            --glass-bg2:  rgba(15,31,61,0.88);
+            --border:     rgba(255,255,255,0.07);
+            --border-blue:rgba(59,130,246,0.20);
+            --text:       #e8f0fe;
+            --text-soft:  #7b93c4;
+            --text-muted: #3d5280;
+            --danger:     #f43f5e;
+            --sidebar-w:  256px;
+            --topbar-h:   62px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        html{scroll-behavior:smooth;}
+        body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--navy);min-height:100vh;overflow-x:hidden;}
+
+        /* BG */
+        #db-bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
+        #db-bg .bg-photo{position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1920&q=70&auto=format&fit=crop');background-size:cover;background-position:center 25%;opacity:0.05;}
+        #db-bg .bg-fade{position:absolute;inset:0;background:linear-gradient(160deg,rgba(5,13,31,0.85) 0%,rgba(5,13,31,0.55) 50%,rgba(5,13,31,0.9) 100%);}
+        #db-bg .bg-mesh{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 15% 20%,rgba(59,130,246,0.06) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 85% 80%,rgba(56,189,248,0.04) 0%,transparent 60%);}
+        #db-bg .bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.025) 1px,transparent 1px);background-size:60px 60px;}
+
+        /* TOPBAR */
+        .db-topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);z-index:200;display:flex;align-items:center;padding:0 1.5rem 0 0;background:rgba(5,13,31,0.88);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-bottom:1px solid var(--border);}
+        .db-topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue-lt) 40%,var(--cyan) 60%,transparent);opacity:0.45;}
+
+        .db-brand-zone{min-width:320px;flex-shrink:0;display:flex;align-items:center;gap:12px;padding:0 1.25rem;border-right:1px solid var(--border);height:100%;}
+        .db-brand-badge{width:36px;height:36px;border-radius:10px;background:linear-gradient(140deg,var(--blue-lt),var(--blue-dk));display:flex;align-items:center;justify-content:center;font-size:1.05rem;box-shadow:0 0 16px var(--blue-glow);flex-shrink:0;}
+        .db-brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:0.88rem;letter-spacing:0.4px;color:#fff;text-transform:uppercase;line-height:1.1;}
+        .db-brand-name em{color:var(--cyan);font-style:normal;display:block;}
+        .db-brand-sub{display:block;font-size:0.4rem;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--cyan);margin-top:2px;opacity:0.85;}
+
+        .db-topbar-right{flex:1;display:flex;align-items:center;justify-content:space-between;padding-left:3rem;}
+        .db-page-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:0.3px;color:#fff;text-transform:uppercase;}
+        .db-page-title span{color:var(--text-muted);font-size:0.82rem;font-family:'DM Sans',sans-serif;font-weight:400;display:block;}
+
+        .user-pill{display:flex;align-items:center;gap:12px;background:rgba(59,130,246,0.12);border:1px solid var(--border-blue);border-radius:50px;padding:5px 16px 5px 5px;cursor:pointer;transition:all 0.25s;box-shadow:0 0 15px rgba(59,130,246,0.12);}
+        .user-pill:hover{background:rgba(59,130,246,0.22);border-color:var(--blue-lt);transform:scale(1.02);box-shadow:0 0 20px var(--blue-glow);}
+        .user-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--blue-lt);flex-shrink:0;}
+        .user-name{font-size:0.875rem;font-weight:800;color:#fff;line-height:1.2;letter-spacing:0.3px;}
+        .user-email{font-size:0.7rem;color:var(--cyan);font-weight:600;opacity:0.8;}
+
+        .db-hamburger{display:flex;align-items:center;justify-content:center;background:var(--blue-dim);border:1px solid var(--border-blue);border-radius:10px;width:38px;height:38px;color:var(--blue-lt);font-size:1.2rem;cursor:pointer;margin-right:1rem;transition:all 0.2s;flex-shrink:0;}
+        .db-hamburger:hover{background:var(--blue-lt);color:#fff;box-shadow:0 0 15px var(--blue-glow);}
+
+        /* SIDEBAR */
+        .db-sidebar{position:fixed;top:var(--topbar-h);left:0;bottom:0;width:var(--sidebar-w);z-index:100;background:rgba(5,13,31,0.96);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 0.9rem 1.5rem;transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);transform:translateX(-100%);}
+        .db-sidebar.open{transform:translateX(0);}
+        .nav-group-label{font-size:0.58rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);padding:0 0.5rem;margin:1.1rem 0 0.5rem;}
+        .nav-group-label:first-child{margin-top:0;}
+
+        .sb-link{display:flex;align-items:center;gap:12px;padding:0.75rem 1rem;border-radius:12px;color:rgba(255,255,255,0.65);text-decoration:none;font-weight:600;font-size:0.9rem;transition:all 0.25s;margin-bottom:4px;border:1px solid transparent;}
+        .sb-link:hover{background:rgba(59,130,246,0.1);color:#fff;transform:translateX(5px);}
+        .sb-link.active{background:rgba(59,130,246,0.18);color:var(--blue-lt);font-weight:800;border-color:rgba(59,130,246,0.25);box-shadow:0 4px 15px rgba(59,130,246,0.1);}
+        .sb-link i{font-size:1.1rem;transition:transform 0.2s;color:rgba(255,255,255,0.45);}
+        .sb-link.active i{color:var(--blue-lt);transform:scale(1.1);}
+        .sb-link:hover i{color:var(--blue-lt);}
+        .sb-link.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:3px;background:linear-gradient(180deg,var(--blue-lt),var(--cyan));border-radius:2px;}
+        .sb-link-danger{color:rgba(244,63,94,0.55);}
+        .sb-link-danger:hover{background:rgba(244,63,94,0.07);color:var(--danger);}
+
+        .sb-footer{margin-top:auto;padding-top:1.25rem;border-top:1px solid var(--border);}
+        .sb-footer-stat{display:flex;align-items:center;justify-content:space-between;padding:0.38rem 0.5rem;}
+        .sb-footer-stat-label{font-size:0.7rem;color:var(--text-muted);}
+        .sb-footer-stat-val{font-size:0.7rem;font-weight:700;color:var(--blue-lt);background:var(--blue-dim);padding:1px 8px;border-radius:20px;}
+
+        /* MAIN */
+        .db-main{position:relative;z-index:1;margin-left:0;padding-top:var(--topbar-h);min-height:100vh;transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
+        .db-inner{padding:2rem;}
+
+        /* SHARED */
+        .fp-tag{display:inline-flex;align-items:center;gap:5px;padding:0.27rem 0.78rem;border-radius:50px;font-size:0.67rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;}
+        .fp-tag-blue{background:var(--blue-dim);color:var(--blue-lt);border:1px solid var(--border-blue);}
+        .fp-tag-cyan{background:var(--cyan-dim);color:var(--cyan);border:1px solid rgba(56,189,248,0.25);}
+        .fp-tag-green{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.25);}
+        .fp-tag-red{background:rgba(244,63,94,0.1);color:var(--danger);border:1px solid rgba(244,63,94,0.22);}
+
+        canvas{border-radius:8px;}
+        ::-webkit-scrollbar{width:4px;}
+        ::-webkit-scrollbar-track{background:var(--navy);}
+        ::-webkit-scrollbar-thumb{background:rgba(59,130,246,0.18);border-radius:3px;}
+
+        @media(max-width:991px){.db-sidebar{transform:translateX(-100%);}.db-sidebar.open{transform:translateX(0);}.db-main{margin-left:0;}.db-brand-zone{width:auto;border-right:none;}.db-hamburger{display:block;}.db-inner{padding:1.25rem;}}
+        @media(max-width:575px){.db-topbar{padding-right:0.75rem;}.db-brand-zone{padding:0 0.75rem;}.user-email{display:none;}}
+    </style>
 </head>
 <body>
-    
-    <!-- Glass Sidebar -->
-    <nav class="sidebar glass-shadow">
-        <a href="{% url 'UserHome' %}" class="brand-logo mb-4 mt-3">
-            <i class="bi bi-activity text-primary"></i><br>
-            Football Player<br>Analysis
-        </a>
-        
-        <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item">
-                <a href="{% url 'UserHome' %}" class="nav-link {% if request.resolver_match.url_name == 'UserHome' %}active{% endif %}">
-                    <i class="bi bi-house-door nav-icon"></i> Dashboard Home
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'prediction' %}" class="nav-link {% if request.resolver_match.url_name == 'prediction' %}active{% endif %}">
-                    <i class="bi bi-camera-video nav-icon"></i> Analyze Video
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'index' %}" class="nav-link mt-4 text-danger bg-white bg-opacity-50">
-                    <i class="bi bi-box-arrow-right nav-icon"></i> Logout
-                </a>
-            </li>
-        </ul>
-        
-        <div class="mt-auto text-center">
-            <!-- Footer removed as per user request -->
-        </div>
-    </nav>
+<div id="db-bg">
+    <div class="bg-photo"></div><div class="bg-fade"></div><div class="bg-mesh"></div><div class="bg-grid"></div>
+</div>
 
-    <!-- Main Content Area -->
-    <main class="main-content">
-        <!-- Top Navigation / Header -->
+<!-- TOPBAR -->
+<header class="db-topbar">
+    <div class="db-brand-zone">
+        <button class="db-hamburger" id="dbHamburger" aria-label="Menu"><i class="bi bi-list" id="dbHamIcon"></i></button>
+        <div class="db-brand-badge" style="background:var(--navy-2);padding:2px;overflow:hidden;"><img src="{% static 'img/football_logo.png' %}" alt="Logo" style="width:100%;height:100%;object-fit:contain;"></div>
+        <div><div class="db-brand-name">FOOTBALL PLAYER <em>TRACK</em></div><span class="db-brand-sub">Detection & Analytics</span></div>
+    </div>
+    <div class="db-topbar-right">
+        <div><div class="db-page-title" id="db-page-title">Dashboard</div></div>
         {% if logged_in_user %}
-        <div class="d-flex justify-content-end align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-10">
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end d-none d-md-block">
-                    <div class="fw-bold text-primary-dark" style="line-height:1.2; font-size: 1.05rem;">{{ logged_in_user.name }}</div>
-                    <small class="text-muted" style="font-size: 0.8rem;">{{ logged_in_user.email }}</small>
-                </div>
-                <div class="rounded-circle overflow-hidden border border-2 border-primary border-opacity-25 bg-white shadow-sm" style="width: 48px; height: 48px;">
-                    {% if logged_in_user.profile_image %}
-                        <img src="{{ logged_in_user.profile_image.url }}" alt="Profile" class="w-100 h-100 object-fit-cover">
-                    {% else %}
-                        <img src="https://ui-avatars.com/api/?name={{ logged_in_user.name|urlencode }}&background=e0f2fe&color=0284c7&bold=true&rounded=true" alt="Profile" class="w-100 h-100 object-fit-cover">
-                    {% endif %}
-                </div>
-            </div>
+        <div class="user-pill">
+            {% if logged_in_user.profile_image %}
+                <img src="{{ logged_in_user.profile_image.url }}" alt="Avatar" class="user-avatar">
+            {% else %}
+                <img src="https://ui-avatars.com/api/?name={{ logged_in_user.name|urlencode }}&background=0a1628&color=60a5fa&bold=true&rounded=true" alt="Avatar" class="user-avatar">
+            {% endif %}
+            <div><div class="user-name">{{ logged_in_user.name }}</div><div class="user-email">{{ logged_in_user.email }}</div></div>
         </div>
         {% endif %}
+    </div>
+</header>
 
-        {% block contents %}
-        {% endblock %}
-    </main>
+<!-- SIDEBAR -->
+<aside class="db-sidebar" id="dbSidebar">
+    <div class="nav-group-label">Main</div>
+    <a href="{% url 'UserHome' %}" class="sb-link {% if request.resolver_match.url_name == 'UserHome' %}active{% endif %}"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+    <a href="{% url 'prediction' %}" class="sb-link {% if request.resolver_match.url_name == 'prediction' %}active{% endif %}"><i class="bi bi-camera-video-fill"></i> Analyze Video</a>
+    <div class="nav-group-label">Account</div>
+    <a href="{% url 'index' %}" class="sb-link sb-link-danger"><i class="bi bi-box-arrow-left"></i> Logout</a>
+    <div class="sb-footer">
+        <div class="sb-footer-stat"><span class="sb-footer-stat-label">Model</span><span class="sb-footer-stat-val">YOLOv8</span></div>
+        <div class="sb-footer-stat"><span class="sb-footer-stat-label">Tracker</span><span class="sb-footer-stat-val">ByteTrack</span></div>
+        <div class="sb-footer-stat"><span class="sb-footer-stat-label">Version</span><span class="sb-footer-stat-val">v1.0</span></div>
+    </div>
+</aside>
 
-    <!-- Bootstrap 5 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    {% block extra_scripts %}{% endblock %}
-    <!-- PWA Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    console.log('ServiceWorker registration successful');
-                }, function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
-            });
-        }
-    </script>
+<main class="db-main">
+    <div class="db-inner">{% block contents %}{% endblock %}</div>
+</main>
+
+<div id="sidebarOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99;backdrop-filter:blur(2px);"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+const hamburger=document.getElementById('dbHamburger'),sidebar=document.getElementById('dbSidebar'),main=document.querySelector('.db-main'),overlay=document.getElementById('sidebarOverlay'),hamIcon=document.getElementById('dbHamIcon');
+function openSidebar(){sidebar.classList.add('open');overlay.style.display='block';hamIcon.className='bi bi-x-lg';}
+function closeSidebar(){sidebar.classList.remove('open');overlay.style.display='none';hamIcon.className='bi bi-list';}
+hamburger.addEventListener('click',(e)=>{e.stopPropagation();sidebar.classList.contains('open')?closeSidebar():openSidebar();});
+overlay.addEventListener('click',closeSidebar);
+sidebar.querySelectorAll('.sb-link').forEach(a=>a.addEventListener('click',()=>{if(window.innerWidth<992)closeSidebar();}));
+const activeLink=document.querySelector('.sb-link.active');
+if(activeLink){const txt=activeLink.textContent.trim();const el=document.getElementById('db-page-title');if(el&&txt)el.textContent=txt;}
+// Sidebar starts closed by default for a cleaner landing page
+if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}
+</script>
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>

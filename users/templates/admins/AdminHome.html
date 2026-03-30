@@ -3,50 +3,64 @@
 {% block contents %}
 
 <div class="container-fluid py-2">
-    <div class="glass-card border-0 mb-4 p-5 d-flex align-items-center justify-content-between position-relative overflow-hidden">
+    <div class="glass-card border-0 mb-4 p-5 d-flex align-items-center justify-content-between position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(15,31,61,0.9), rgba(5,13,31,0.95)); border-left: 4px solid var(--danger) !important;">
         <!-- Background decorative blob -->
-        <div class="position-absolute top-0 end-0 bg-danger rounded-circle opacity-10" style="width: 300px; height: 300px; transform: translate(50%, -50%); filter: blur(50px);"></div>
+        <div class="position-absolute top-0 end-0 bg-danger rounded-circle" style="width: 250px; height: 250px; transform: translate(40%, -40%); filter: blur(70px); opacity: 0.15;"></div>
+        <div class="position-absolute bottom-0 start-0 bg-blue rounded-circle" style="width: 200px; height: 200px; transform: translate(-30%, 30%); filter: blur(60px); opacity: 0.08;"></div>
         
         <div class="position-relative z-1">
-            <h1 class="display-5 fw-bold text-primary-dark mb-2">Admin Dashboard</h1>
-            <p class="text-muted mb-0 fs-5">Overview of System Status and AI Metrics</p>
+            <h1 class="fw-bold mb-2" style="font-family:'Syne',sans-serif; font-size:3.2rem; color:#fff; letter-spacing:-0.5px;">Admin <span style="color:var(--danger);">Dashboard</span></h1>
+            <p style="color:var(--text-soft); font-size:1.1rem; font-weight:500;">Real-time system health and neural pipeline overview</p>
         </div>
-        <div class="position-relative z-1 text-end">
-            <div class="d-inline-flex bg-white bg-opacity-50 p-3 rounded-4 shadow-sm border border-black border-opacity-10 align-items-center mb-2">
-                <i class="bi bi-cpu text-primary fs-2 me-3"></i>
-                <div class="text-start">
-                    <p class="text-muted small fw-bold mb-0 text-uppercase tracking-wider">AI Pipeline Status</p>
-                    <h5 class="fw-bold text-success mb-0 d-flex align-items-center">
-                        <span class="spinner-grow spinner-grow-sm text-success me-2" role="status"></span> Active (YOLOv8 + ByteTrack)
-                    </h5>
+        
+        <div class="position-relative z-1">
+            <div class="d-inline-flex flex-column align-items-end">
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:1rem 1.5rem; border-radius:20px; backdrop-filter:blur(12px);">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width:48px; height:48px; border-radius:14px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); display:flex; align-items:center; justify-content:center;">
+                            <i class="bi bi-cpu" style="color:#4ade80; font-size:1.4rem;"></i>
+                        </div>
+                        <div>
+                            <p style="font-size:0.6rem; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-soft); margin-bottom:2px;">AI Pipeline Status</p>
+                            <h5 style="font-weight:800; color:#4ade80; margin-bottom:0; display:flex; align-items:center; font-size:0.95rem;">
+                                <span class="spinner-grow spinner-grow-sm me-2" style="width:8px; height:8px; color:#4ade80;"></span> 
+                                Active <span style="color:#fff; opacity:0.6; font-weight:400; font-size:0.8rem; margin-left:6px;">(YOLOv8 + ByteTrack)</span>
+                            </h5>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row g-4 mb-4">
-        <!-- Quick Stats Cards Here If Needed -->
         <div class="col-md-4">
-            <div class="glass-card p-4 border-0 border-start border-4 border-primary shadow-sm h-100">
-                <h6 class="text-muted text-uppercase fw-bold mb-3">Total Processed Videos</h6>
-                <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="fw-bold text-primary-dark mb-0"><i class="bi bi-film me-2"></i>{{ total_videos|default:"0" }}</h2>
+            <div class="glass-card p-4 border-0 border-start border-4 border-primary h-100">
+                <p style="font-size:0.68rem; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:var(--text-soft); margin-bottom:1.25rem;">Total Processed Videos</p>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h2 class="mb-0" style="font-family:'Syne',sans-serif; font-weight:800; font-size:2.8rem; background:linear-gradient(135deg, #fff, var(--text-soft)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">
+                        <i class="bi bi-film me-2" style="-webkit-text-fill-color:var(--blue-lt);"></i>{{ total_videos|default:"0" }}
+                    </h2>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="glass-card p-4 border-0 border-start border-4 border-warning shadow-sm h-100">
-                <h6 class="text-muted text-uppercase fw-bold mb-3">System Load (SQLite)</h6>
-                <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="fw-bold text-primary-dark mb-0"><i class="bi bi-database me-2"></i>Stable</h2>
+            <div class="glass-card p-4 border-0 border-start border-4 border-warning h-100">
+                <p style="font-size:0.68rem; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:var(--text-soft); margin-bottom:1.25rem;">System Load (SQLite)</p>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h2 class="mb-0" style="font-family:'Syne',sans-serif; font-weight:800; font-size:2.4rem; color:#fff;">
+                        <i class="bi bi-database-fill-check me-2" style="color:var(--danger);"></i>Stable
+                    </h2>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="glass-card p-4 border-0 border-start border-4 border-success shadow-sm h-100">
-                <h6 class="text-muted text-uppercase fw-bold mb-3">Active Users</h6>
-                <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="fw-bold text-primary-dark mb-0"><i class="bi bi-people me-2"></i>{{ active_users|default:"0" }}</h2>
+            <div class="glass-card p-4 border-0 border-start border-4 border-success h-100">
+                <p style="font-size:0.68rem; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:var(--text-soft); margin-bottom:1.25rem;">Active Users</p>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h2 class="mb-0" style="font-family:'Syne',sans-serif; font-weight:800; font-size:2.8rem; background:linear-gradient(135deg, #fff, #4ade80); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">
+                        <i class="bi bi-people-fill me-2" style="-webkit-text-fill-color:#4ade80;"></i>{{ active_users|default:"0" }}
+                    </h2>
                 </div>
             </div>
         </div>

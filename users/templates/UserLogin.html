@@ -1,45 +1,61 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block contents %}
-<div class="container d-flex justify-content-center align-items-center w-100">
-    <div class="glass-panel p-5" style="max-width: 450px; width: 100%;">
-        <div class="text-center mb-4">
-            <h2 class="fw-bold mb-2">Welcome Back</h2>
-            <p class="text-muted small">Enter your credentials to access your dashboard</p>
+<style>
+.auth-page { min-height:calc(100vh - 68px);display:flex;align-items:center;justify-content:center;padding:2.5rem 1rem;position:relative;overflow:hidden; }
+.auth-page::before { content:'';position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1624880357913-a8539238245b?w=1400&q=70&auto=format&fit=crop');background-size:cover;background-position:center 40%;opacity:0.12;pointer-events:none; }
+.auth-page::after { content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(59,130,246,0.08) 0%,transparent 70%);pointer-events:none; }
+
+.auth-card { position:relative;z-index:1;background:var(--glass-bg2);border:1px solid var(--border-blue);border-radius:24px;width:100%;max-width:440px;backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.65),0 0 0 1px rgba(59,130,246,0.12);animation:riseUp 0.6s cubic-bezier(.22,.68,0,1.2) forwards; }
+@keyframes riseUp{from{opacity:0;transform:translateY(35px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+.auth-header { background:linear-gradient(135deg,rgba(59,130,246,0.12),rgba(29,78,216,0.06));border-bottom:1px solid var(--border-blue);padding:2rem 2rem 1.75rem;text-align:center; }
+.auth-emblem { width:64px;height:64px;border-radius:18px;background:linear-gradient(140deg,var(--blue-lt),var(--blue-dk));display:flex;align-items:center;justify-content:center;font-size:1.75rem;margin:0 auto 1rem;box-shadow:0 0 28px var(--blue-glow); }
+.auth-title { font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;letter-spacing:0.5px;color:#fff;line-height:1; }
+.auth-sub { font-size:0.82rem;color:var(--text-soft);margin-top:0.3rem; }
+.auth-body { padding:1.75rem 2rem 2rem; }
+
+.divider-line { display:flex;align-items:center;gap:0.75rem;color:var(--text-muted);font-size:0.72rem;margin:1.4rem 0; }
+.divider-line::before,.divider-line::after { content:'';flex:1;height:1px;background:var(--border); }
+.auth-footer-links { text-align:center;font-size:0.82rem;color:var(--text-soft);margin-top:1.25rem; }
+</style>
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-emblem" style="background:var(--navy-2);padding:10px;overflow:hidden;"><img src="{% static 'img/football_logo.png' %}" alt="Logo" style="width:100%;height:100%;object-fit:contain;"></div>
+            <div class="auth-title">Welcome Back</div>
+            <p class="auth-sub" style="color:var(--cyan);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;font-size:0.75rem;">Analyst Authentication</p>
         </div>
-
-        <form action="{% url 'UserLoginCheck' %}" method="POST">
-            {% csrf_token %}
-            
-            <div class="mb-4">
-                <label class="form-label small fw-semibold text-muted">Login ID</label>
-                <input type="text" class="form-control glass-input" name="loginid" required placeholder="Enter your ID">
-            </div>
-            
-            <div class="mb-4">
-                <label class="form-label small fw-semibold text-muted">Password</label>
-                <input type="password" class="form-control glass-input" name="pswd" required placeholder="••••••••">
-            </div>
-            
-            <div class="d-grid gap-2">
-                <button class="btn btn-glass" type="submit">Sign In</button>
-            </div>
-
-            {% if messages %}
-                <div class="mt-4">
+        <div class="auth-body">
+            <form action="{% url 'UserLoginCheck' %}" method="POST" autocomplete="off">
+                {% csrf_token %}
+                <div class="fp-field">
+                    <label class="fp-label" for="loginid">Login ID</label>
+                    <i class="bi bi-person fp-icon"></i>
+                    <input type="text" id="loginid" name="loginid" class="fp-input" required placeholder="Enter your login ID" autocomplete="username">
+                </div>
+                <div class="fp-field" style="position:relative;">
+                    <label class="fp-label" for="pswd">Password</label>
+                    <i class="bi bi-lock fp-icon"></i>
+                    <input type="password" id="pswd" name="pswd" class="fp-input" required placeholder="••••••••" autocomplete="current-password" style="padding-right:2.8rem!important;">
+                    <button type="button" class="fp-eye" onclick="togglePwd('pswd',this)"><i class="bi bi-eye"></i></button>
+                </div>
+                {% if messages %}
                     {% for message in messages %}
-                        <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-25 text-success small text-center rounded-3 py-2">
+                        <div class="{% if message.tags == 'success' %}fp-alert-success{% else %}fp-alert-danger{% endif %} mb-3">
+                            <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %} me-1"></i>
                             {{ message }}
                         </div>
                     {% endfor %}
-                </div>
-            {% endif %}
-            
-            <div class="text-center mt-4">
-                <p class="small text-muted">Don't have an account? <a href="{% url 'UserRegisterForm' %}" class="text-primary text-decoration-none fw-semibold">Sign up</a></p>
-            </div>
-        </form>
+                {% endif %}
+                <div style="margin-top:1.5rem;"><button type="submit" class="btn-fp-blue"><i class="bi bi-box-arrow-in-right"></i> Sign In</button></div>
+            </form>
+            <div class="divider-line">or</div>
+            <div class="auth-footer-links">No account? <a href="{% url 'UserRegisterForm' %}" class="auth-link">Create one free</a></div>
+            <div class="auth-footer-links" style="margin-top:0.6rem;">Admin? <a href="{% url 'AdminLogin' %}" class="auth-link" style="color:var(--danger);">Admin login →</a></div>
+        </div>
     </div>
 </div>
+<script>function togglePwd(id,btn){const f=document.getElementById(id),i=btn.querySelector('i');f.type=f.type==='password'?'text':'password';i.className=f.type==='password'?'bi bi-eye':'bi bi-eye-slash';}</script>
 {% endblock %}

@@ -2,6 +2,7 @@
 from django.shortcuts import render,redirect
 from django.contrib import messages
 from users.models import UserRegistrationModel
+import time
 
 
 # Create your views here.
@@ -27,49 +28,47 @@ def RegisterUsersView(request):
 
 
 def ActivaUsers(request):
-    if request.method == 'GET':
-        user_id = request.GET.get('uid')
-        
-        if user_id:  # Ensure user_id is not None
-            status = 'activated'
-            print("Activating user with ID =", user_id)
-            UserRegistrationModel.objects.filter(id=user_id).update(status=status)
-
-        # Redirect to the view where users are listed after activation
-        return redirect('RegisterUsersView')  # Replace with your actual URL name
+    if request.method == 'POST':
+        user_id = request.POST.get('uid')
+        if user_id:
+            try:
+                UserRegistrationModel.objects.filter(id=user_id).update(status='activated')
+                messages.success(request, 'Member account successfully activated!')
+            except Exception as e:
+                messages.error(request, f'Failed to activate account: {e}')
+    return redirect(f'/userDetails?t={int(time.time())}')
 
 def DeleteUsers(request):
-    if request.method == 'GET':
-        user_id = request.GET.get('uid')
-        
+    if request.method == 'POST':
+        user_id = request.POST.get('uid')
         if user_id:
-            print("Deleting user with ID =", user_id)
-            UserRegistrationModel.objects.filter(id=user_id).delete()
-            messages.success(request, 'User deleted successfully!')
-
-        return redirect('RegisterUsersView')
+            try:
+                UserRegistrationModel.objects.filter(id=user_id).delete()
+                messages.success(request, 'Member was permanently removed from the system.')
+            except Exception as e:
+                messages.error(request, f'Error deleting member: {e}')
+    return redirect(f'/userDetails?t={int(time.time())}')
 
 def EditUsers(request):
     if request.method == 'POST':
         user_id = request.POST.get('uid')
-        name = request.POST.get('name')
-        mobile = request.POST.get('mobile')
-        email = request.POST.get('email')
-        profile_image = request.FILES.get('profile_image')
-        
         if user_id:
             try:
                 user = UserRegistrationModel.objects.get(id=user_id)
-                user.name = name
-                user.mobile = mobile
-                user.email = email
+                user.name = request.POST.get('name')
+                user.mobile = request.POST.get('mobile')
+                user.email = request.POST.get('email')
+                user.address = request.POST.get('address')
+                user.city = request.POST.get('city')
+                user.state = request.POST.get('state')
+                
+                profile_image = request.FILES.get('profile_image')
                 if profile_image:
                     user.profile_image = profile_image
                 user.save()
-                messages.success(request, 'User edited successfully!')
-            except UserRegistrationModel.DoesNotExist:
-                messages.error(request, 'User not found.')
-            
-    return redirect('RegisterUsersView')
+                messages.success(request, f'Profile for {user.name} updated successfully.')
+            except Exception as e:
+                messages.error(request, f'Failed to update profile: {e}')
+    return redirect(f'/userDetails?t={int(time.time())}')
 
 

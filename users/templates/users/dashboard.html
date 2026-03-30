@@ -1,86 +1,146 @@
 {% extends 'users/userbase.html' %}
 {% load static %}
 {% block contents %}
-<div class="container-fluid py-2">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-primary-dark m-0">Dashboard Home</h2>
-            <p class="text-muted m-0">Your video analysis history</p>
-        </div>
-        <a href="{% url 'prediction' %}" class="btn btn-primary px-4 rounded-pill shadow-sm">
-            <i class="bi bi-cloud-upload me-2"></i> New Analysis
-        </a>
-    </div>
+<style>
+.welcome-banner { background:linear-gradient(135deg,rgba(59,130,246,0.09) 0%,rgba(17,24,40,0.6) 60%);border:1px solid var(--border-blue);border-radius:18px;padding:1.75rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;position:relative;overflow:hidden; }
+.welcome-banner::after { content:'⚽';position:absolute;right:3%;top:50%;transform:translateY(-50%);font-size:7rem;opacity:0.04;pointer-events:none; }
+.welcome-title { font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;letter-spacing:0.3px;color:#fff;line-height:1; }
+.welcome-title span { color:var(--cyan); }
+.welcome-sub { font-size:0.83rem;color:var(--text-soft);margin-top:0.3rem; }
 
-    <div class="row g-4">
-        {% if videos %}
-            {% for video in videos %}
-            <div class="col-md-6 col-lg-4">
-                <div class="glass-card p-4 border-0 shadow-sm h-100 position-relative overflow-hidden transition-all hover-lift">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-circle">
-                                <i class="bi bi-film"></i>
-                            </div>
-                            <h5 class="fw-semibold m-0 text-truncate" style="max-width: 150px;">
-                                Video #{{ forloop.revcounter }}
-                            </h5>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            {% if video.status == 'Completed' %}
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 rounded-pill">Completed</span>
-                            {% elif video.status == 'Pending' or video.status == 'Processing' %}
-                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1 rounded-pill"><i class="spinner-border spinner-border-sm me-1" style="width: 10px; height: 10px;"></i> Processing</span>
-                            {% else %}
-                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 rounded-pill">Failed</span>
-                            {% endif %}
-                            
-                            <!-- Delete Button -->
-                            <a href="{% url 'delete_video' video.id %}" onclick="return confirm('Are you sure you want to permanently delete Video #{{ forloop.revcounter }}? This action cannot be undone.');" class="btn btn-sm btn-outline-danger border-0 px-2 py-1" style="position: relative; z-index: 2;" title="Delete Video">
-                                <i class="bi bi-trash3"></i>
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-3 text-muted small mb-4">
-                        <i class="bi bi-calendar3 me-1"></i> Uploaded: {{ video.created_at|date:"M d, Y h:i A" }}
-                    </div>
+.btn-analyze { 
+    display:inline-flex;align-items:center;gap:10px;padding:0.82rem 1.65rem;border-radius:14px;border:none;
+    background:linear-gradient(135deg,var(--blue-lt),var(--blue-dk));
+    color:#fff;font-family:'DM Sans',sans-serif;font-weight:800;font-size:0.95rem;
+    cursor:pointer;transition:all 0.28s;box-shadow:0 6px 24px var(--blue-glow);
+    text-decoration:none;white-space:nowrap;position:relative;overflow:hidden;
+}
+.btn-analyze:hover { transform:translateY(-3px);box-shadow:0 12px 36px var(--blue-glow);color:#fff; }
+.btn-analyze::after { content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);transform:translateX(-100%);transition:transform 0.6s ease; }
+.btn-analyze:hover::after { transform:translateX(100%); }
 
-                    {% if video.status == 'Completed' %}
-                        <a href="{% url 'result' video.id %}" class="btn btn-outline-primary w-100 rounded-3 stretched-link">
-                            View Analytics <i class="bi bi-arrow-right ms-1"></i>
-                        </a>
-                    {% elif video.status == 'Pending' or video.status == 'Processing' %}
-                        <a href="{% url 'result' video.id %}" class="btn btn-outline-warning w-100 rounded-3 stretched-link">
-                            View Processing <i class="bi bi-hourglass-split ms-1"></i>
-                        </a>
-                    {% else %}
-                        <a href="{% url 'result' video.id %}" class="btn btn-outline-danger w-100 rounded-3 stretched-link">
-                            View Status <i class="bi bi-info-circle ms-1"></i>
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="col-12">
-                <div class="glass-card p-5 text-center border-0 shadow-sm">
-                    <div class="display-1 text-muted opacity-25 mb-3">
-                        <i class="bi bi-camera-reels"></i>
-                    </div>
-                    <h4 class="fw-bold text-secondary">No Videos Yet</h4>
-                    <p class="text-muted mb-4">You haven't uploaded any match footage for analysis yet.</p>
-                    <a href="{% url 'prediction' %}" class="btn btn-primary px-4 py-2 rounded-pill">
-                        <i class="bi bi-cloud-upload me-2"></i> Upload First Video
-                    </a>
-                </div>
-            </div>
-        {% endif %}
+.stat-mini { background:var(--glass-bg2);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;display:flex;align-items:center;gap:12px;transition:border-color 0.22s; }
+.stat-mini:hover { border-color:var(--border-blue); }
+.stat-mini-icon { width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0; }
+.smi-blue  { background:var(--blue-dim);  color:var(--blue-lt); }
+.smi-cyan  { background:var(--cyan-dim);  color:var(--cyan); }
+.smi-green { background:var(--green-dim); color:var(--green); }
+.smi-red   { background:rgba(244,63,94,0.1);color:var(--danger); }
+.stat-mini-n { font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;line-height:1;color:var(--blue-lt); }
+.stat-mini-l { font-size:0.72rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px; }
+
+.section-hdr { display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem; }
+.section-hdr-title { font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;color:#fff;letter-spacing:0.3px; }
+.section-hdr-title span { color:var(--cyan); }
+
+.video-card { background:var(--glass-bg2);border:1px solid var(--border);border-radius:18px;padding:1.4rem;height:100%;display:flex;flex-direction:column;transition:all 0.28s;position:relative;overflow:hidden; }
+.video-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue-lt),var(--cyan),transparent);opacity:0;transition:opacity 0.3s; }
+.video-card:hover { border-color:var(--border-blue);transform:translateY(-4px);box-shadow:0 16px 40px rgba(59,130,246,0.1); }
+.video-card:hover::before { opacity:1; }
+
+.vc-num-badge { width:38px;height:38px;border-radius:10px;background:var(--blue-dim);border:1px solid var(--border-blue);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--blue-lt);flex-shrink:0; }
+.vc-title { font-weight:700;font-size:0.95rem;color:#fff; }
+.vc-date  { font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem; }
+
+.status-badge { display:inline-flex;align-items:center;gap:5px;padding:0.25rem 0.72rem;border-radius:50px;font-size:0.67rem;font-weight:700;letter-spacing:0.6px;text-transform:uppercase; }
+.sb-completed  { background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.25); }
+.sb-processing { background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25); }
+.sb-failed     { background:rgba(244,63,94,0.1);color:var(--danger);border:1px solid rgba(244,63,94,0.22); }
+
+.vc-btn { display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:0.78rem;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;text-decoration:none;transition:all 0.25s;border:1px solid;margin-top:auto; }
+.vc-btn-green { background:rgba(34,197,94,0.06);color:var(--green);border-color:rgba(34,197,94,0.22); }
+.vc-btn-green:hover { background:var(--green-dim);color:var(--green);transform:translateY(-2px);box-shadow:0 4px 15px rgba(34,197,94,0.2); }
+.vc-btn-amber { background:rgba(245,158,11,0.06);color:#f59e0b;border-color:rgba(245,158,11,0.22); }
+.vc-btn-amber:hover { background:rgba(245,158,11,0.15);color:#f59e0b;transform:translateY(-2px); }
+.vc-btn-red   { background:rgba(244,63,94,0.06);color:var(--danger);border-color:rgba(244,63,94,0.22); }
+.vc-btn-red:hover { background:rgba(244,63,94,0.15);color:var(--danger);transform:translateY(-2px); }
+
+.vc-delete { width:30px;height:30px;border-radius:8px;background:rgba(244,63,94,0.07);border:1px solid rgba(244,63,94,0.16);display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:0.8rem;cursor:pointer;text-decoration:none;transition:all 0.2s;flex-shrink:0; }
+.vc-delete:hover { background:rgba(244,63,94,0.18);color:var(--danger); }
+
+.empty-state { background:var(--glass-bg2);border:1px dashed var(--border-blue);border-radius:20px;padding:4rem 2rem;text-align:center; }
+.empty-icon { font-size:4rem;color:var(--blue-lt);opacity:0.2;margin-bottom:1rem;display:block; }
+.empty-title { font-family:'Syne',sans-serif;font-weight:700;font-size:1.5rem;color:var(--text-soft);margin-bottom:0.5rem; }
+.empty-desc  { font-size:0.88rem;color:var(--text-muted);margin-bottom:1.5rem; }
+
+@keyframes spinPulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.spin-dot{width:7px;height:7px;border-radius:50%;background:#f59e0b;display:inline-block;animation:spinPulse 1.4s infinite;}
+</style>
+
+<!-- Welcome -->
+<div class="welcome-banner">
+    <div>
+        <div class="welcome-title">Welcome back, <span>{% if logged_in_user %}{{ logged_in_user.name }}{% else %}Analyst{% endif %}</span> 👋</div>
+        <p class="welcome-sub">Here's an overview of your video analysis activity</p>
     </div>
+    <a href="{% url 'prediction' %}" class="btn-analyze"><i class="bi bi-cloud-upload-fill"></i> New Analysis</a>
 </div>
 
-<style>
-    .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; cursor: pointer; }
-</style>
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="stat-mini"><div class="stat-mini-icon smi-blue"><i class="bi bi-film"></i></div><div><div class="stat-mini-n">{{ videos|length|default:"0" }}</div><div class="stat-mini-l">Total Videos</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat-mini"><div class="stat-mini-icon smi-green"><i class="bi bi-check-circle-fill"></i></div><div><div class="stat-mini-n" style="color:var(--green);">{{ videos|length|default:"0" }}</div><div class="stat-mini-l">Completed</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat-mini"><div class="stat-mini-icon smi-cyan"><i class="bi bi-cpu-fill"></i></div><div><div class="stat-mini-n" style="color:var(--cyan);">YOLOv8</div><div class="stat-mini-l">AI Model</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat-mini"><div class="stat-mini-icon smi-red"><i class="bi bi-people-fill"></i></div><div><div class="stat-mini-n" style="color:var(--danger);">22</div><div class="stat-mini-l">Max Tracked</div></div></div></div>
+</div>
+
+<!-- History -->
+<div class="section-hdr">
+    <div class="section-hdr-title">Analysis <span>History</span></div>
+    {% if videos %}<span class="fp-tag fp-tag-blue">{{ videos|length }} video{% if videos|length != 1 %}s{% endif %}</span>{% endif %}
+</div>
+
+<div class="row g-4">
+    {% if videos %}
+        {% for video in videos %}
+        <div class="col-sm-6 col-xl-4">
+            <div class="video-card">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="vc-num-badge">#{{ forloop.revcounter }}</div>
+                        <div>
+                            <div class="vc-title">Video Analysis</div>
+                            <div class="vc-date"><i class="bi bi-calendar3 me-1"></i>{{ video.created_at|date:"M d, Y · h:i A" }}</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if video.status == 'Completed' %}<span class="status-badge sb-completed"><i class="bi bi-check-circle-fill"></i> Done</span>
+                        {% elif video.status == 'Pending' or video.status == 'Processing' %}<span class="status-badge sb-processing"><span class="spin-dot"></span> Processing</span>
+                        {% else %}<span class="status-badge sb-failed"><i class="bi bi-x-circle-fill"></i> Failed</span>{% endif %}
+                        <a href="{% url 'delete_video' video.id %}" onclick="return confirm('Delete this analysis?');" class="vc-delete" title="Delete"><i class="bi bi-trash3"></i></a>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 flex-wrap mb-3">
+                    <span class="fp-tag fp-tag-blue"><i class="bi bi-cpu"></i> YOLOv8</span>
+                    <span class="fp-tag fp-tag-cyan"><i class="bi bi-diagram-3"></i> ByteTrack</span>
+                </div>
+                <div style="height:1px;background:var(--border);margin-bottom:1rem;"></div>
+                {% if video.status == 'Completed' %}<a href="{% url 'result' video.id %}" class="vc-btn vc-btn-green"><i class="bi bi-bar-chart-fill"></i> View Analytics <i class="bi bi-arrow-right"></i></a>
+                {% elif video.status == 'Pending' or video.status == 'Processing' %}<a href="{% url 'result' video.id %}" class="vc-btn vc-btn-amber"><i class="bi bi-hourglass-split"></i> View Processing</a>
+                {% else %}<a href="{% url 'result' video.id %}" class="vc-btn vc-btn-red"><i class="bi bi-info-circle"></i> View Status</a>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        <div class="col-sm-6 col-xl-4">
+            <a href="{% url 'prediction' %}" style="text-decoration:none;">
+                <div class="video-card" style="border-style:dashed;align-items:center;justify-content:center;min-height:180px;cursor:pointer;background:rgba(59,130,246,0.02);">
+                    <div style="text-align:center;">
+                        <div style="width:52px;height:52px;border-radius:14px;background:var(--blue-dim);border:1px solid var(--border-blue);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--blue-lt);margin:0 auto 0.75rem;"><i class="bi bi-plus-lg"></i></div>
+                        <div style="font-weight:700;color:var(--blue-lt);font-size:0.9rem;">New Analysis</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;">Upload match footage</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    {% else %}
+        <div class="col-12">
+            <div class="empty-state">
+                <i class="bi bi-camera-reels empty-icon"></i>
+                <div class="empty-title">No Videos Yet</div>
+                <p class="empty-desc">You haven't uploaded any match footage for analysis. Start by uploading your first video.</p>
+                <a href="{% url 'prediction' %}" class="btn-analyze"><i class="bi bi-cloud-upload-fill"></i> Upload First Video</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}

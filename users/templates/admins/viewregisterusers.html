@@ -5,17 +5,17 @@
 <div class="container-fluid py-2">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold text-primary-dark m-0">User Management</h2>
-            <p class="text-muted m-0">View, manage, and edit registered platform users</p>
+            <h2 class="fw-bold" style="font-family:'Syne',sans-serif;color:#fff;font-size:2rem;letter-spacing:0.4px;">User <span style="color:var(--danger);">Management</span></h2>
+            <p style="color:var(--text-soft);font-size:0.85rem;margin-top:2px;">Audit and manage all registered platform analysts</p>
         </div>
     </div>
 
     {% if messages %}
     <div class="mb-4">
         {% for message in messages %}
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm glass-panel" role="alert" style="background: rgba(220, 252, 231, 0.6);">
-            <i class="bi bi-check-circle-fill me-2 text-success"></i> <strong>{{ message }}</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="fp-alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} mb-3 shadow-sm" role="alert">
+            <i class="bi {% if message.tags == 'error' %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %} me-2"></i> 
+            <strong>{{ message }}</strong>
         </div>
         {% endfor %}
     </div>
@@ -35,7 +35,7 @@
                 </thead>
                 <tbody class="border-top-0">
                     {% for i in data %}
-                    <tr class="bg-white bg-opacity-25" style="border-bottom: 1px solid var(--glass-border);">
+                    <tr style="background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);transition:all 0.2s;">
                         <td class="fw-bold text-muted" data-sort="{{ forloop.counter }}">#{{ forloop.counter }}</td>
                         <td>
                             <div class="d-flex align-items-center">
@@ -50,32 +50,36 @@
                                 </div>
                                 {% endif %}
                                 <div>
-                                    <div class="fw-bold text-primary-dark">{{ i.name }}</div>
-                                    <div class="small text-muted">{{ i.loginid }}</div>
+                                    <div style="font-weight:800;color:#fff;font-size:0.95rem;">{{ i.name }}</div>
+                                    <div style="font-size:0.75rem;color:var(--blue-lt);font-weight:700;letter-spacing:0.3px;">@{{ i.loginid }}</div>
                                 </div>
                             </div>
                         </td>
                         <td>
                             {% if i.status == 'waiting' %}
-                            <span class="badge bg-warning bg-opacity-25 text-warning fw-semibold rounded-pill px-3 py-2 border border-warning border-opacity-25">
+                            <span class="badge" style="background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);padding:0.5rem 0.9rem;border-radius:50px;font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">
                                 <i class="bi bi-hourglass-split me-1"></i> Waiting
                             </span>
                             {% else %}
-                            <span class="badge bg-success bg-opacity-25 text-success fw-semibold rounded-pill px-3 py-2 border border-success border-opacity-25">
-                                <i class="bi bi-check-circle me-1"></i> Active
+                            <span class="badge" style="background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.25);padding:0.5rem 0.9rem;border-radius:50px;font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">
+                                <i class="bi bi-check-circle-fill me-1"></i> Active
                             </span>
                             {% endif %}
                         </td>
                         <td>
-                            <div class="small"><i class="bi bi-envelope text-muted me-1"></i> {{ i.email }}</div>
-                            <div class="small"><i class="bi bi-telephone text-muted me-1"></i> {{ i.mobile }}</div>
+                            <div style="font-size:0.82rem;font-weight:600;color:var(--text-soft);margin-bottom:2px;"><i class="bi bi-envelope-at-fill me-1" style="color:var(--blue-lt);"></i> {{ i.email }}</div>
+                            <div style="font-size:0.82rem;font-weight:600;color:var(--text-soft);"><i class="bi bi-phone-fill me-1" style="color:var(--cyan);"></i> {{ i.mobile }}</div>
                         </td>
                         <td class="text-end">
                             <div class="d-flex justify-content-end gap-2">
                                 {% if i.status == 'waiting' %}
-                                <a href="{% url 'activate_users' %}?uid={{ i.id }}" class="btn btn-outline-success rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center fw-semibold" style="font-size: 0.85rem;">
-                                    <i class="bi bi-check2 me-1"></i> Activate
-                                </a>
+                                <form action="{% url 'activate_users' %}" method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="uid" value="{{ i.id }}">
+                                    <button type="submit" class="btn btn-outline-success rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center fw-semibold" style="font-size: 0.85rem;">
+                                        <i class="bi bi-person-check-fill me-1"></i> Activate
+                                    </button>
+                                </form>
                                 {% else %}
                                 <button type="button" class="btn btn-outline-primary rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center fw-semibold" style="font-size: 0.85rem;" title="Edit User" data-bs-toggle="modal" data-bs-target="#editModal{{ i.id }}">
                                     <i class="bi bi-pencil-fill me-2"></i> Edit
@@ -110,7 +114,11 @@
                 <p class="text-muted mb-4">Are you sure you want to permanently delete <strong>{{ i.name }}</strong> ({{ i.loginid }})? This action cannot be undone.</p>
                 <div class="d-flex gap-3 justify-content-center">
                     <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
-                    <a href="{% url 'delete_users' %}?uid={{ i.id }}" class="btn btn-danger fw-bold px-4 shadow-sm">Yes, Delete User</a>
+                    <form action="{% url 'delete_users' %}" method="POST" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="uid" value="{{ i.id }}">
+                        <button type="submit" class="btn btn-danger fw-bold px-4 shadow-sm">Yes, Delete Account</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -141,11 +149,25 @@
                         <label class="form-label small fw-semibold text-muted">Email</label>
                         <input type="email" name="email" class="form-control glass-input" value="{{ i.email }}">
                     </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-semibold text-muted">City</label>
+                            <input type="text" name="city" class="form-control glass-input" value="{{ i.city }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-semibold text-muted">State</label>
+                            <input type="text" name="state" class="form-control glass-input" value="{{ i.state }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Residential Address</label>
+                        <textarea name="address" class="form-control glass-input" rows="2">{{ i.address }}</textarea>
+                    </div>
                     <div class="mb-4">
                         <label class="form-label small fw-semibold text-muted">Profile Picture <span class="text-muted fw-normal">(Optional)</span></label>
                         <input type="file" name="profile_image" accept="image/*" class="form-control glass-input">
                         {% if i.profile_image %}
-                            <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Uploading a new image will replace the current one.</small>
+                            <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Current: {{ i.profile_image.name }}</small>
                         {% endif %}
                     </div>
                     <div class="d-grid">
