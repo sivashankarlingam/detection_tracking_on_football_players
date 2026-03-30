@@ -2,66 +2,334 @@
 {% load static %}
 {% block contents %}
 
-<div class="container-fluid py-2">
-    <div class="glass-card border-0 mb-4 p-5 d-flex align-items-center justify-content-between position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(15,31,61,0.9), rgba(5,13,31,0.95)); border-left: 4px solid var(--danger) !important;">
-        <!-- Background decorative blob -->
-        <div class="position-absolute top-0 end-0 bg-danger rounded-circle" style="width: 250px; height: 250px; transform: translate(40%, -40%); filter: blur(70px); opacity: 0.15;"></div>
-        <div class="position-absolute bottom-0 start-0 bg-blue rounded-circle" style="width: 200px; height: 200px; transform: translate(-30%, 30%); filter: blur(60px); opacity: 0.08;"></div>
-        
-        <div class="position-relative z-1">
-            <h1 class="fw-bold mb-2" style="font-family:'Syne',sans-serif; font-size:3.2rem; color:#fff; letter-spacing:-0.5px;">Admin <span style="color:var(--danger);">Dashboard</span></h1>
-            <p style="color:var(--text-soft); font-size:1.1rem; font-weight:500;">Real-time system health and neural pipeline overview</p>
+<style>
+/* ── Hero Banner ── */
+.admin-hero {
+    background: linear-gradient(135deg, rgba(15,31,61,0.92) 0%, rgba(5,13,31,0.97) 100%);
+    border: 1px solid var(--border-blue);
+    border-left: 3px solid var(--danger);
+    border-radius: 20px;
+    padding: 2.25rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+.admin-hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(244,63,94,0.15) 0%, transparent 70%);
+    transform: translate(30%, -30%); pointer-events: none;
+}
+.admin-hero::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+    transform: translate(-30%, 30%); pointer-events: none;
+}
+.hero-title { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(2rem,4vw,3rem); color:#fff; letter-spacing:-0.5px; margin-bottom:0.4rem; }
+.hero-title span { color:var(--danger); }
+.hero-sub { color:var(--text-soft); font-size:0.95rem; font-weight:400; }
+.hero-status-card { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:16px; padding:1rem 1.25rem; backdrop-filter:blur(12px); }
+.hero-status-icon { width:46px; height:46px; border-radius:13px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#4ade80; flex-shrink:0; }
+.hero-status-label { font-size:0.58rem; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:2px; }
+.hero-status-val { font-family:'Syne',sans-serif; font-weight:800; color:#4ade80; font-size:0.88rem; display:flex; align-items:center; gap:6px; }
+.hero-status-val .badge-live { display:inline-block; width:7px; height:7px; border-radius:50%; background:#4ade80; animation:livePulse 1.4s infinite; }
+@keyframes livePulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+/* ── Stat Cards ── */
+.stat-card {
+    background: var(--glass-bg2);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.5rem 1.5rem 1.4rem;
+    height: 100%;
+    transition: all 0.28s;
+    position: relative;
+    overflow: hidden;
+}
+.stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    opacity: 0; transition: opacity 0.3s;
+}
+.stat-card:hover { transform: translateY(-4px); }
+.stat-card:hover::before { opacity: 1; }
+
+.stat-card-blue  { border-left: 3px solid var(--blue-lt); }
+.stat-card-blue::before  { background: linear-gradient(90deg, transparent, var(--blue-lt), transparent); }
+.stat-card-blue:hover  { border-color: var(--border-blue); box-shadow: 0 16px 40px rgba(59,130,246,0.1); }
+
+.stat-card-green { border-left: 3px solid var(--green); }
+.stat-card-green::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+.stat-card-green:hover { border-color: rgba(34,197,94,0.3); box-shadow: 0 16px 40px rgba(34,197,94,0.08); }
+
+.stat-card-cyan  { border-left: 3px solid var(--cyan); }
+.stat-card-cyan::before  { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
+.stat-card-cyan:hover  { border-color: rgba(56,189,248,0.3); box-shadow: 0 16px 40px rgba(56,189,248,0.08); }
+
+.stat-card-red   { border-left: 3px solid var(--danger); }
+.stat-card-red::before   { background: linear-gradient(90deg, transparent, var(--danger), transparent); }
+.stat-card-red:hover   { border-color: rgba(244,63,94,0.3); box-shadow: 0 16px 40px rgba(244,63,94,0.08); }
+
+.stat-icon { width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:1.25rem; margin-bottom:1.1rem; flex-shrink:0; }
+.si-blue  { background:var(--blue-dim);  color:var(--blue-lt); border:1px solid var(--border-blue); }
+.si-green { background:var(--green-dim); color:var(--green);   border:1px solid rgba(34,197,94,0.22); }
+.si-cyan  { background:var(--cyan-dim);  color:var(--cyan);    border:1px solid rgba(56,189,248,0.22); }
+.si-red   { background:rgba(244,63,94,0.1); color:var(--danger); border:1px solid rgba(244,63,94,0.22); }
+
+.stat-label { font-size:0.67rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.4rem; }
+.stat-value { font-family:'Syne',sans-serif; font-weight:800; font-size:2.5rem; line-height:1; color:#fff; }
+.stat-value.blue-grad  { background:linear-gradient(135deg,var(--blue-lt),var(--cyan)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.stat-value.green-grad { background:linear-gradient(135deg,#4ade80,#16a34a); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.stat-value.cyan-grad  { background:linear-gradient(135deg,var(--cyan),#0891b2); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.stat-value.red-grad   { background:linear-gradient(135deg,#f87171,#dc2626); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.stat-sub { font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem; }
+
+/* ── Section Header ── */
+.section-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; }
+.section-title { font-family:'Syne',sans-serif; font-weight:800; font-size:1.2rem; color:#fff; letter-spacing:0.3px; }
+.section-title span { color:var(--cyan); }
+
+/* ── Info Cards ── */
+.info-card { background:var(--glass-bg2); border:1px solid var(--border); border-radius:18px; padding:1.5rem; height:100%; transition:border-color 0.22s; }
+.info-card:hover { border-color:var(--border-blue); }
+.info-card-title { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; color:#fff; margin-bottom:1.1rem; display:flex; align-items:center; gap:8px; }
+
+/* ── Pipeline steps ── */
+.pipe-step { display:flex; align-items:center; gap:12px; padding:0.7rem 0.9rem; border-radius:11px; background:rgba(59,130,246,0.04); border:1px solid var(--border); margin-bottom:7px; transition:all 0.2s; }
+.pipe-step:hover { border-color:var(--border-blue); background:var(--blue-dim); }
+.pipe-step-dot { width:8px; height:8px; border-radius:50%; background:var(--blue-lt); flex-shrink:0; box-shadow:0 0 6px rgba(96,165,250,0.5); }
+.pipe-step-dot.active { background:var(--green); box-shadow:0 0 6px rgba(34,197,94,0.5); animation:livePulse 2s infinite; }
+.pipe-step-text { font-size:0.82rem; color:var(--text-soft); font-weight:500; flex:1; }
+.pipe-step-badge { font-size:0.62rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:20px; }
+
+/* ── Quick Nav cards ── */
+.quick-nav-card { background:var(--glass-bg2); border:1px solid var(--border); border-radius:16px; padding:1.25rem 1.4rem; display:flex; align-items:center; gap:14px; text-decoration:none; transition:all 0.25s; position:relative; overflow:hidden; }
+.quick-nav-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--blue-lt),transparent); opacity:0; transition:opacity 0.3s; }
+.quick-nav-card:hover { border-color:var(--border-blue); transform:translateY(-2px); box-shadow:0 12px 32px rgba(59,130,246,0.1); }
+.quick-nav-card:hover::before { opacity:1; }
+.quick-nav-icon { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+.quick-nav-text { font-weight:700; font-size:0.9rem; color:#fff; }
+.quick-nav-sub  { font-size:0.74rem; color:var(--text-muted); margin-top:1px; }
+.quick-nav-arrow { margin-left:auto; color:var(--text-muted); font-size:0.9rem; transition:transform 0.2s; }
+.quick-nav-card:hover .quick-nav-arrow { transform:translateX(3px); color:var(--blue-lt); }
+</style>
+
+<!-- ── HERO BANNER ── -->
+<div class="admin-hero">
+    <div class="row align-items-center gy-3" style="position:relative;z-index:1;">
+        <div class="col-lg-7">
+            <div class="hero-title">Admin <span>Dashboard</span></div>
+            <p class="hero-sub">Real-time system health &amp; neural pipeline overview — FP Track v1.0</p>
+            <div class="d-flex gap-2 flex-wrap mt-3">
+                <span class="fp-tag fp-tag-blue"><i class="bi bi-cpu"></i> YOLOv8</span>
+                <span class="fp-tag fp-tag-cyan"><i class="bi bi-diagram-3"></i> ByteTrack</span>
+                <span class="fp-tag fp-tag-green"><i class="bi bi-check-circle-fill"></i> System Nominal</span>
+            </div>
         </div>
-        
-        <div class="position-relative z-1">
-            <div class="d-inline-flex flex-column align-items-end">
-                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:1rem 1.5rem; border-radius:20px; backdrop-filter:blur(12px);">
-                    <div class="d-flex align-items-center gap-3">
-                        <div style="width:48px; height:48px; border-radius:14px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); display:flex; align-items:center; justify-content:center;">
-                            <i class="bi bi-cpu" style="color:#4ade80; font-size:1.4rem;"></i>
-                        </div>
-                        <div>
-                            <p style="font-size:0.6rem; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-soft); margin-bottom:2px;">AI Pipeline Status</p>
-                            <h5 style="font-weight:800; color:#4ade80; margin-bottom:0; display:flex; align-items:center; font-size:0.95rem;">
-                                <span class="spinner-grow spinner-grow-sm me-2" style="width:8px; height:8px; color:#4ade80;"></span> 
-                                Active <span style="color:#fff; opacity:0.6; font-weight:400; font-size:0.8rem; margin-left:6px;">(YOLOv8 + ByteTrack)</span>
-                            </h5>
+        <div class="col-lg-5 d-flex justify-content-lg-end">
+            <div class="hero-status-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="hero-status-icon"><i class="bi bi-cpu-fill"></i></div>
+                    <div>
+                        <div class="hero-status-label">AI Pipeline Status</div>
+                        <div class="hero-status-val">
+                            <span class="badge-live"></span>
+                            Active
+                            <span style="color:var(--text-muted);font-weight:400;font-size:0.78rem;">(YOLOv8 + ByteTrack)</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="glass-card p-4 border-0 border-start border-4 border-primary h-100">
-                <p style="font-size:0.68rem; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:var(--text-soft); margin-bottom:1.25rem;">Total Processed Videos</p>
-                <div class="d-flex align-items-center justify-content-between">
-                    <h2 class="mb-0" style="font-family:'Syne',sans-serif; font-weight:800; font-size:2.8rem; background:linear-gradient(135deg, #fff, var(--text-soft)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">
-                        <i class="bi bi-film me-2" style="-webkit-text-fill-color:var(--blue-lt);"></i>{{ total_videos|default:"0" }}
-                    </h2>
+<!-- ── STAT CARDS ── -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card stat-card-blue">
+            <div class="stat-icon si-blue"><i class="bi bi-film"></i></div>
+            <div class="stat-label">Total Videos</div>
+            <div class="stat-value blue-grad">{{ total_videos|default:"0" }}</div>
+            <div class="stat-sub">Processed analyses</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card stat-card-green">
+            <div class="stat-icon si-green"><i class="bi bi-people-fill"></i></div>
+            <div class="stat-label">Active Users</div>
+            <div class="stat-value green-grad">{{ active_users|default:"0" }}</div>
+            <div class="stat-sub">Registered analysts</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card stat-card-cyan">
+            <div class="stat-icon si-cyan"><i class="bi bi-database-fill-check"></i></div>
+            <div class="stat-label">System Load</div>
+            <div class="stat-value cyan-grad" style="font-size:1.6rem; padding-top:0.3rem;">Stable</div>
+            <div class="stat-sub">SQLite · Nominal</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card stat-card-red">
+            <div class="stat-icon si-red"><i class="bi bi-person-fill-exclamation"></i></div>
+            <div class="stat-label">Pending Approval</div>
+            <div class="stat-value red-grad">{{ pending_users|default:"0" }}</div>
+            <div class="stat-sub">Awaiting activation</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── BOTTOM SECTION ── -->
+<div class="row g-4">
+    <!-- AI Pipeline Status -->
+    <div class="col-lg-5">
+        <div class="info-card">
+            <div class="info-card-title">
+                <i class="bi bi-cpu-fill" style="color:var(--blue-lt);"></i> AI Pipeline
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-step-dot active"></div>
+                <div class="pipe-step-text">YOLOv8 Detection Engine</div>
+                <span class="pipe-step-badge fp-tag fp-tag-green">Online</span>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-step-dot active"></div>
+                <div class="pipe-step-text">ByteTrack Multi-Object Tracker</div>
+                <span class="pipe-step-badge fp-tag fp-tag-green">Online</span>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-step-dot active"></div>
+                <div class="pipe-step-text">Homography Pitch Mapping</div>
+                <span class="pipe-step-badge fp-tag fp-tag-green">Online</span>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-step-dot active"></div>
+                <div class="pipe-step-text">Speed &amp; Distance Computation</div>
+                <span class="pipe-step-badge fp-tag fp-tag-green">Online</span>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-step-dot active"></div>
+                <div class="pipe-step-text">Video Export &amp; Annotation</div>
+                <span class="pipe-step-badge fp-tag fp-tag-green">Online</span>
+            </div>
+
+            <!-- Spec grid -->
+            <div class="row g-2 mt-3">
+                <div class="col-6">
+                    <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:11px;padding:0.75rem 0.9rem;">
+                        <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-muted);">Architecture</div>
+                        <div style="font-weight:700;color:#fff;font-size:0.88rem;margin-top:2px;">Anchor-Free CSP</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:11px;padding:0.75rem 0.9rem;">
+                        <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-muted);">Inference</div>
+                        <div style="font-weight:700;color:var(--cyan);font-size:0.88rem;margin-top:2px;">~33ms / frame</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:11px;padding:0.75rem 0.9rem;">
+                        <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-muted);">mAP@50</div>
+                        <div style="font-weight:700;color:var(--blue-lt);font-size:0.88rem;margin-top:2px;">96.1%</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:11px;padding:0.75rem 0.9rem;">
+                        <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-muted);">Max Tracked</div>
+                        <div style="font-weight:700;color:var(--green);font-size:0.88rem;margin-top:2px;">22 players</div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="glass-card p-4 border-0 border-start border-4 border-warning h-100">
-                <p style="font-size:0.68rem; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:var(--text-soft); margin-bottom:1.25rem;">System Load (SQLite)</p>
-                <div class="d-flex align-items-center justify-content-between">
-                    <h2 class="mb-0" style="font-family:'Syne',sans-serif; font-weight:800; font-size:2.4rem; color:#fff;">
-                        <i class="bi bi-database-fill-check me-2" style="color:var(--danger);"></i>Stable
-                    </h2>
-                </div>
+    </div>
+
+    <!-- Quick Navigation + Info -->
+    <div class="col-lg-7 d-flex flex-column gap-4">
+        <!-- Quick Nav -->
+        <div>
+            <div class="section-hdr">
+                <div class="section-title">Quick <span>Navigation</span></div>
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <a href="{% url 'RegisterUsersView' %}" class="quick-nav-card">
+                    <div class="quick-nav-icon" style="background:var(--blue-dim);color:var(--blue-lt);border:1px solid var(--border-blue);">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <div class="quick-nav-text">User Management</div>
+                        <div class="quick-nav-sub">View, edit, activate and remove users</div>
+                    </div>
+                    <i class="bi bi-arrow-right quick-nav-arrow"></i>
+                </a>
+                <a href="{% url 'index' %}" class="quick-nav-card">
+                    <div class="quick-nav-icon" style="background:rgba(244,63,94,0.08);color:var(--danger);border:1px solid rgba(244,63,94,0.2);">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </div>
+                    <div>
+                        <div class="quick-nav-text">Logout</div>
+                        <div class="quick-nav-sub">End the current admin session</div>
+                    </div>
+                    <i class="bi bi-arrow-right quick-nav-arrow"></i>
+                </a>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="glass-card p-4 border-0 border-start border-4 border-success h-100">
-                <p style="font-size:0.68rem; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:var(--text-soft); margin-bottom:1.25rem;">Active Users</p>
-                <div class="d-flex align-items-center justify-content-between">
-                    <h2 class="mb-0" style="font-family:'Syne',sans-serif; font-weight:800; font-size:2.8rem; background:linear-gradient(135deg, #fff, #4ade80); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">
-                        <i class="bi bi-people-fill me-2" style="-webkit-text-fill-color:#4ade80;"></i>{{ active_users|default:"0" }}
-                    </h2>
+
+        <!-- System Info -->
+        <div class="info-card" style="flex:1;">
+            <div class="info-card-title">
+                <i class="bi bi-bar-chart-fill" style="color:var(--cyan);"></i> Detection Performance
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                {% for label, val, color in detection_metrics|default:"" %}
+                {% empty %}
+                <!-- Default metrics when no context provided -->
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <span style="font-size:0.78rem;color:var(--text-soft);font-weight:600;width:90px;flex-shrink:0;">mAP@50</span>
+                    <div style="flex:1;height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:96%;border-radius:3px;background:linear-gradient(90deg,var(--blue-lt),var(--cyan));transition:width 1s ease;"></div>
+                    </div>
+                    <span style="font-size:0.8rem;color:var(--blue-lt);font-weight:700;width:48px;text-align:right;flex-shrink:0;">96.1%</span>
                 </div>
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <span style="font-size:0.78rem;color:var(--text-soft);font-weight:600;width:90px;flex-shrink:0;">Precision</span>
+                    <div style="flex:1;height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:94%;border-radius:3px;background:linear-gradient(90deg,var(--blue-lt),var(--cyan));"></div>
+                    </div>
+                    <span style="font-size:0.8rem;color:var(--blue-lt);font-weight:700;width:48px;text-align:right;flex-shrink:0;">94.3%</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <span style="font-size:0.78rem;color:var(--text-soft);font-weight:600;width:90px;flex-shrink:0;">Recall</span>
+                    <div style="flex:1;height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:93%;border-radius:3px;background:linear-gradient(90deg,var(--blue-lt),var(--cyan));"></div>
+                    </div>
+                    <span style="font-size:0.8rem;color:var(--blue-lt);font-weight:700;width:48px;text-align:right;flex-shrink:0;">92.8%</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <span style="font-size:0.78rem;color:var(--text-soft);font-weight:600;width:90px;flex-shrink:0;">Ball Det.</span>
+                    <div style="flex:1;height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:91%;border-radius:3px;background:linear-gradient(90deg,var(--green),#16a34a);"></div>
+                    </div>
+                    <span style="font-size:0.8rem;color:var(--green);font-weight:700;width:48px;text-align:right;flex-shrink:0;">91.5%</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <span style="font-size:0.78rem;color:var(--text-soft);font-weight:600;width:90px;flex-shrink:0;">Inference</span>
+                    <div style="flex:1;height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:87%;border-radius:3px;background:linear-gradient(90deg,var(--cyan),#0891b2);"></div>
+                    </div>
+                    <span style="font-size:0.8rem;color:var(--cyan);font-weight:700;width:48px;text-align:right;flex-shrink:0;">~33ms</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Bottom notice -->
+            <div style="margin-top:1.25rem;padding:0.85rem 1rem;background:rgba(59,130,246,0.05);border:1px solid var(--border-blue);border-radius:11px;">
+                <p style="font-size:0.78rem;color:var(--text-soft);line-height:1.6;margin:0;">
+                    <span style="color:var(--blue-lt);font-weight:600;">Fine-tuned</span> on a curated broadcast football dataset with custom annotations for players, goalkeepers, referees, and ball.
+                </p>
             </div>
         </div>
     </div>

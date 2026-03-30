@@ -2,122 +2,189 @@
 {% load static %}
 {% block contents %}
 
-<div class="container-fluid py-2">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold" style="font-family:'Syne',sans-serif;color:#fff;font-size:2rem;letter-spacing:0.4px;">User <span style="color:var(--danger);">Management</span></h2>
-            <p style="color:var(--text-soft);font-size:0.85rem;margin-top:2px;">Audit and manage all registered platform analysts</p>
+<style>
+/* ── Page Header ── */
+.page-hdr { margin-bottom: 2rem; }
+.page-hdr h2 { font-family:'Syne',sans-serif; font-weight:800; font-size:1.85rem; letter-spacing:0.3px; color:#fff; line-height:1; }
+.page-hdr h2 span { color:var(--danger); }
+.page-hdr p { font-size:0.83rem; color:var(--text-muted); margin-top:0.25rem; }
+
+/* ── Table Panel ── */
+.table-panel { background:var(--glass-bg2); border:1px solid var(--border); border-radius:20px; overflow:hidden; }
+.table-panel-hdr { padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem; }
+.table-panel-title { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; color:#fff; display:flex; align-items:center; gap:8px; }
+
+/* ── Avatar circle ── */
+.user-av { width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid var(--border-blue); flex-shrink:0; }
+
+/* ── Action buttons ── */
+.act-btn { display:inline-flex; align-items:center; gap:6px; padding:0.38rem 0.9rem; border-radius:50px; font-size:0.78rem; font-weight:700; cursor:pointer; transition:all 0.2s; text-decoration:none; border:1px solid; }
+.act-btn-edit   { background:var(--blue-dim);   color:var(--blue-lt); border-color:var(--border-blue); }
+.act-btn-edit:hover   { background:rgba(59,130,246,0.22); color:var(--blue-lt); }
+.act-btn-del    { background:rgba(244,63,94,0.08); color:var(--danger);  border-color:rgba(244,63,94,0.22); }
+.act-btn-del:hover    { background:rgba(244,63,94,0.2);  color:var(--danger); }
+.act-btn-activate { background:rgba(34,197,94,0.08); color:var(--green); border-color:rgba(34,197,94,0.22); }
+.act-btn-activate:hover { background:rgba(34,197,94,0.2); color:var(--green); }
+
+/* ── Modals ── */
+.modal-del-icon { width:72px; height:72px; border-radius:50%; background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.2); display:inline-flex; align-items:center; justify-content:center; font-size:2rem; color:var(--danger); margin-bottom:1.25rem; }
+.modal-hdr-line { background:linear-gradient(90deg, transparent, var(--border-blue), transparent); height:1px; }
+
+/* ── Alert overrides ── */
+.fp-alert-success { background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); color:#4ade80; border-radius:12px; padding:0.78rem 1rem; font-size:0.84rem; display:flex; align-items:center; gap:8px; }
+.fp-alert-danger  { background:rgba(244,63,94,0.08); border:1px solid rgba(244,63,94,0.2); color:var(--danger); border-radius:12px; padding:0.78rem 1rem; font-size:0.84rem; display:flex; align-items:center; gap:8px; }
+
+/* ── Scrollbar hint ── */
+.table-responsive { border-radius: 0 0 20px 20px; }
+</style>
+
+<div class="page-hdr">
+    <h2>User <span>Management</span></h2>
+    <p>Audit, activate, edit and remove registered platform analysts</p>
+</div>
+
+{% if messages %}
+<div class="mb-4">
+    {% for message in messages %}
+    <div class="fp-alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} mb-2">
+        <i class="bi {% if message.tags == 'error' %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %}"></i>
+        <strong>{{ message }}</strong>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="table-panel">
+    <div class="table-panel-hdr">
+        <div class="table-panel-title">
+            <i class="bi bi-people-fill" style="color:var(--blue-lt);"></i>
+            Registered Users
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            {% if data %}
+            <span class="fp-tag fp-tag-blue">{{ data|length }} total</span>
+            {% endif %}
+            <span class="fp-tag fp-tag-cyan"><i class="bi bi-shield-lock-fill"></i> Admin View</span>
         </div>
     </div>
 
-    {% if messages %}
-    <div class="mb-4">
-        {% for message in messages %}
-        <div class="fp-alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} mb-3 shadow-sm" role="alert">
-            <i class="bi {% if message.tags == 'error' %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %} me-2"></i> 
-            <strong>{{ message }}</strong>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
+    <div class="table-responsive">
+        <table id="usersTable" class="table table-hover align-middle mb-0" style="background:transparent;">
+            <thead>
+                <tr>
+                    <th style="padding:1rem 1.25rem; font-size:0.67rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border); white-space:nowrap;">#</th>
+                    <th style="padding:1rem 1.25rem; font-size:0.67rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border);">User Info</th>
+                    <th style="padding:1rem 1.25rem; font-size:0.67rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border);">Status</th>
+                    <th style="padding:1rem 1.25rem; font-size:0.67rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border);">Contact</th>
+                    <th style="padding:1rem 1.25rem; font-size:0.67rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border); text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in data %}
+                <tr style="border-bottom:1px solid var(--border); transition:background 0.18s;">
+                    <!-- ID -->
+                    <td style="padding:1rem 1.25rem;" data-sort="{{ forloop.counter }}">
+                        <span style="font-family:'Syne',sans-serif; font-weight:800; font-size:0.9rem; color:var(--text-muted);">#{{ forloop.counter }}</span>
+                    </td>
 
-    <div class="glass-panel p-4 border-0 shadow-sm">
-        <div class="table-responsive">
-            <table id="usersTable" class="table table-hover align-middle mb-0" style="background: transparent;">
-                <thead class="bg-primary bg-opacity-10 text-primary-dark border-bottom border-primary border-opacity-25">
-                    <tr>
-                        <th class="border-0 rounded-start">ID</th>
-                        <th class="border-0">User Info</th>
-                        <th class="border-0">Role / Status</th>
-                        <th class="border-0">Contact</th>
-                        <th class="border-0 text-end rounded-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="border-top-0">
-                    {% for i in data %}
-                    <tr style="background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);transition:all 0.2s;">
-                        <td class="fw-bold text-muted" data-sort="{{ forloop.counter }}">#{{ forloop.counter }}</td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <!-- Profile Placeholder or Image -->
-                                {% if i.profile_image %}
-                                <div class="rounded-circle me-3 overflow-hidden border border-2 border-primary border-opacity-25" style="width: 45px; height: 45px;">
-                                    <img src="{{ i.profile_image.url }}" alt="Profile" class="w-100 h-100 object-fit-cover">
-                                </div>
-                                {% else %}
-                                <div class="rounded-circle me-3 overflow-hidden border border-2 border-primary border-opacity-25 shadow-sm" style="width: 45px; height: 45px;">
-                                    <img src="https://ui-avatars.com/api/?name={{ i.name }}&background=e0f2fe&color=0284c7&bold=true&rounded=true" alt="{{ i.name }}" class="w-100 h-100 object-fit-cover">
-                                </div>
-                                {% endif %}
-                                <div>
-                                    <div style="font-weight:800;color:#fff;font-size:0.95rem;">{{ i.name }}</div>
-                                    <div style="font-size:0.75rem;color:var(--blue-lt);font-weight:700;letter-spacing:0.3px;">@{{ i.loginid }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            {% if i.status == 'waiting' %}
-                            <span class="badge" style="background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);padding:0.5rem 0.9rem;border-radius:50px;font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">
-                                <i class="bi bi-hourglass-split me-1"></i> Waiting
-                            </span>
+                    <!-- User Info -->
+                    <td style="padding:1rem 1.25rem;">
+                        <div class="d-flex align-items-center gap-3">
+                            {% if i.profile_image %}
+                            <img src="{{ i.profile_image.url }}" alt="{{ i.name }}" class="user-av">
                             {% else %}
-                            <span class="badge" style="background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.25);padding:0.5rem 0.9rem;border-radius:50px;font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">
-                                <i class="bi bi-check-circle-fill me-1"></i> Active
-                            </span>
+                            <img src="https://ui-avatars.com/api/?name={{ i.name|urlencode }}&background=0a1628&color=60a5fa&bold=true&rounded=true" alt="{{ i.name }}" class="user-av">
                             {% endif %}
-                        </td>
-                        <td>
-                            <div style="font-size:0.82rem;font-weight:600;color:var(--text-soft);margin-bottom:2px;"><i class="bi bi-envelope-at-fill me-1" style="color:var(--blue-lt);"></i> {{ i.email }}</div>
-                            <div style="font-size:0.82rem;font-weight:600;color:var(--text-soft);"><i class="bi bi-phone-fill me-1" style="color:var(--cyan);"></i> {{ i.mobile }}</div>
-                        </td>
-                        <td class="text-end">
-                            <div class="d-flex justify-content-end gap-2">
-                                {% if i.status == 'waiting' %}
-                                <form action="{% url 'activate_users' %}" method="POST" class="d-inline">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="uid" value="{{ i.id }}">
-                                    <button type="submit" class="btn btn-outline-success rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center fw-semibold" style="font-size: 0.85rem;">
-                                        <i class="bi bi-person-check-fill me-1"></i> Activate
-                                    </button>
-                                </form>
-                                {% else %}
-                                <button type="button" class="btn btn-outline-primary rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center fw-semibold" style="font-size: 0.85rem;" title="Edit User" data-bs-toggle="modal" data-bs-target="#editModal{{ i.id }}">
-                                    <i class="bi bi-pencil-fill me-2"></i> Edit
-                                </button>
-                                <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center fw-semibold" style="font-size: 0.85rem;" title="Delete User" data-bs-toggle="modal" data-bs-target="#deleteModal{{ i.id }}">
-                                    <i class="bi bi-trash-fill me-2"></i> Delete
-                                </button>
-                                {% endif %}
+                            <div>
+                                <div style="font-weight:700; color:#fff; font-size:0.95rem; line-height:1.2;">{{ i.name }}</div>
+                                <div style="font-size:0.74rem; color:var(--blue-lt); font-weight:600; margin-top:2px; letter-spacing:0.2px;">@{{ i.loginid }}</div>
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </td>
 
+                    <!-- Status -->
+                    <td style="padding:1rem 1.25rem;">
+                        {% if i.status == 'waiting' %}
+                        <span class="fp-tag" style="background:rgba(245,158,11,0.1); color:#f59e0b; border:1px solid rgba(245,158,11,0.25);">
+                            <i class="bi bi-hourglass-split"></i> Pending
+                        </span>
+                        {% else %}
+                        <span class="fp-tag fp-tag-green">
+                            <i class="bi bi-check-circle-fill"></i> Active
+                        </span>
+                        {% endif %}
+                    </td>
 
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                    <!-- Contact -->
+                    <td style="padding:1rem 1.25rem;">
+                        <div style="font-size:0.82rem; color:var(--text-soft); font-weight:500; margin-bottom:3px;">
+                            <i class="bi bi-envelope-fill me-1" style="color:var(--blue-lt); font-size:0.72rem;"></i>{{ i.email }}
+                        </div>
+                        <div style="font-size:0.82rem; color:var(--text-soft); font-weight:500;">
+                            <i class="bi bi-phone-fill me-1" style="color:var(--cyan); font-size:0.72rem;"></i>{{ i.mobile }}
+                        </div>
+                    </td>
+
+                    <!-- Actions -->
+                    <td style="padding:1rem 1.25rem; text-align:right;">
+                        <div class="d-flex justify-content-end gap-2">
+                            {% if i.status == 'waiting' %}
+                            <form action="{% url 'activate_users' %}" method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="uid" value="{{ i.id }}">
+                                <button type="submit" class="act-btn act-btn-activate">
+                                    <i class="bi bi-person-check-fill"></i> Activate
+                                </button>
+                            </form>
+                            {% else %}
+                            <button type="button" class="act-btn act-btn-edit" data-bs-toggle="modal" data-bs-target="#editModal{{ i.id }}">
+                                <i class="bi bi-pencil-fill"></i> Edit
+                            </button>
+                            <button type="button" class="act-btn act-btn-del" data-bs-toggle="modal" data-bs-target="#deleteModal{{ i.id }}">
+                                <i class="bi bi-trash3-fill"></i> Delete
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding:3rem; text-align:center; color:var(--text-muted);">
+                        <i class="bi bi-people" style="font-size:2.5rem; display:block; margin-bottom:0.75rem; opacity:0.3;"></i>
+                        No users registered yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- Render Modals Securely Outside the Table DOM -->
+<!-- ── MODALS ── -->
 {% for i in data %}
-<!-- Delete Modal for User -->
+
+<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal{{ i.id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 glass-panel shadow-lg">
+        <div class="modal-content glass-panel shadow-lg" style="border-color:rgba(244,63,94,0.18);">
             <div class="modal-body p-5 text-center">
-                <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle mb-4" style="width: 80px; height: 80px;">
-                    <i class="bi bi-exclamation-triangle-fill fs-1"></i>
-                </div>
-                <h4 class="fw-bold mb-3">Delete User Account</h4>
-                <p class="text-muted mb-4">Are you sure you want to permanently delete <strong>{{ i.name }}</strong> ({{ i.loginid }})? This action cannot be undone.</p>
+                <div class="modal-del-icon"><i class="bi bi-person-x-fill"></i></div>
+                <h4 style="font-family:'Syne',sans-serif; font-weight:800; color:#fff; margin-bottom:0.6rem;">Delete Account?</h4>
+                <p style="color:var(--text-soft); font-size:0.88rem; line-height:1.6; margin-bottom:2rem;">
+                    You are about to permanently delete <strong style="color:#fff;">{{ i.name }}</strong>
+                    (<span style="color:var(--blue-lt);">@{{ i.loginid }}</span>).<br>
+                    This action <strong style="color:var(--danger);">cannot be undone</strong>.
+                </p>
                 <div class="d-flex gap-3 justify-content-center">
-                    <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="act-btn" style="background:rgba(255,255,255,0.05);color:var(--text-soft);border-color:var(--border);padding:0.6rem 1.5rem;" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i> Cancel
+                    </button>
                     <form action="{% url 'delete_users' %}" method="POST" class="d-inline">
                         {% csrf_token %}
                         <input type="hidden" name="uid" value="{{ i.id }}">
-                        <button type="submit" class="btn btn-danger fw-bold px-4 shadow-sm">Yes, Delete Account</button>
+                        <button type="submit" class="act-btn act-btn-del" style="padding:0.6rem 1.5rem;">
+                            <i class="bi bi-trash3-fill"></i> Yes, Delete
+                        </button>
                     </form>
                 </div>
             </div>
@@ -125,81 +192,124 @@
     </div>
 </div>
 
-<!-- Example Edit Modal -->
+<!-- Edit Modal -->
 <div class="modal fade" id="editModal{{ i.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 glass-panel shadow-lg">
-            <div class="modal-header border-bottom border-secondary border-opacity-10 py-3">
-                <h5 class="modal-title fw-bold"><i class="bi bi-pencil me-2 text-primary"></i>Edit User Profile</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass-panel shadow-lg">
+            <!-- Header -->
+            <div class="modal-header" style="border-bottom:1px solid var(--border); padding:1.25rem 1.5rem;">
+                <div class="d-flex align-items-center gap-3">
+                    {% if i.profile_image %}
+                    <img src="{{ i.profile_image.url }}" alt="{{ i.name }}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid var(--border-blue);">
+                    {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ i.name|urlencode }}&background=0a1628&color=60a5fa&bold=true&rounded=true" alt="{{ i.name }}" style="width:38px;height:38px;border-radius:50%;">
+                    {% endif %}
+                    <div>
+                        <h5 style="font-family:'Syne',sans-serif; font-weight:800; color:#fff; margin:0; font-size:1.05rem;">
+                            <i class="bi bi-pencil-fill me-2" style="color:var(--blue-lt); font-size:0.9rem;"></i>Edit Profile
+                        </h5>
+                        <div style="font-size:0.72rem; color:var(--text-muted);">@{{ i.loginid }}</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter:invert(1) opacity(0.5);"></button>
             </div>
+
+            <!-- Body -->
             <div class="modal-body p-4">
                 <form action="{% url 'edit_users' %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <input type="hidden" name="uid" value="{{ i.id }}">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-muted">Full Name</label>
-                        <input type="text" name="name" class="form-control glass-input" value="{{ i.name }}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-muted">Mobile / Contact</label>
-                        <input type="text" name="mobile" class="form-control glass-input" value="{{ i.mobile }}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-muted">Email</label>
-                        <input type="email" name="email" class="form-control glass-input" value="{{ i.email }}">
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-semibold text-muted">City</label>
-                            <input type="text" name="city" class="form-control glass-input" value="{{ i.city }}">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label style="font-size:0.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.38rem;">Full Name</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-person" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;pointer-events:none;"></i>
+                                <input type="text" name="name" class="form-control glass-input" value="{{ i.name }}" style="padding-left:2.5rem!important;">
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-semibold text-muted">State</label>
-                            <input type="text" name="state" class="form-control glass-input" value="{{ i.state }}">
+                        <div class="col-md-6">
+                            <label style="font-size:0.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.38rem;">Mobile Number</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-phone" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;pointer-events:none;"></i>
+                                <input type="text" name="mobile" class="form-control glass-input" value="{{ i.mobile }}" style="padding-left:2.5rem!important;">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label style="font-size:0.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.38rem;">Email Address</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-envelope" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;pointer-events:none;"></i>
+                                <input type="email" name="email" class="form-control glass-input" value="{{ i.email }}" style="padding-left:2.5rem!important;">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label style="font-size:0.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.38rem;">City</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-building" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;pointer-events:none;"></i>
+                                <input type="text" name="city" class="form-control glass-input" value="{{ i.city }}" style="padding-left:2.5rem!important;">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label style="font-size:0.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.38rem;">State</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-pin-map" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;pointer-events:none;"></i>
+                                <input type="text" name="state" class="form-control glass-input" value="{{ i.state }}" style="padding-left:2.5rem!important;">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label style="font-size:0.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.38rem;">Full Address</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-house" style="position:absolute;left:12px;top:13px;color:var(--text-muted);font-size:0.85rem;pointer-events:none;"></i>
+                                <textarea name="address" class="form-control glass-input" rows="2" style="padding-left:2.5rem!important;resize:vertical;">{{ i.address }}</textarea>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label style="font-size:0.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.38rem;">
+                                Profile Picture <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span>
+                            </label>
+                            <input type="file" name="profile_image" accept="image/*" class="form-control glass-input">
+                            {% if i.profile_image %}
+                            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:6px;display:flex;align-items:center;gap:5px;">
+                                <i class="bi bi-image" style="color:var(--blue-lt);"></i> Current: {{ i.profile_image.name }}
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-muted">Residential Address</label>
-                        <textarea name="address" class="form-control glass-input" rows="2">{{ i.address }}</textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label small fw-semibold text-muted">Profile Picture <span class="text-muted fw-normal">(Optional)</span></label>
-                        <input type="file" name="profile_image" accept="image/*" class="form-control glass-input">
-                        {% if i.profile_image %}
-                            <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Current: {{ i.profile_image.name }}</small>
-                        {% endif %}
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-glass">Save Changes</button>
+
+                    <!-- Divider -->
+                    <div style="height:1px;background:var(--border);margin:1.5rem 0;"></div>
+
+                    <div class="d-flex gap-3 justify-content-end">
+                        <button type="button" class="act-btn" style="background:rgba(255,255,255,0.04);color:var(--text-soft);border-color:var(--border);padding:0.6rem 1.25rem;" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn-glass" style="padding:0.65rem 1.75rem;width:auto;">
+                            <i class="bi bi-floppy-fill"></i> Save Changes
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
-{% endfor %}
 
+{% endfor %}
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-    $(document).ready(function() {
-        // Initialize DataTables
-        $('#usersTable').DataTable({
-            "pageLength": 10,
-            "language": {
-                "search": "",
-                "searchPlaceholder": "Search users..."
-            },
-            "dom": "<'row mb-3'<'col-md-6'l><'col-md-6 d-flex justify-content-end'f>>" +
-                   "<'row'<'col-sm-12'tr>>" +
-                   "<'row mt-3'<'col-md-5'i><'col-md-7 d-flex justify-content-end'p>>",
-            "drawCallback": function() {
-                $('.dataTables_filter input').addClass('glass-input ms-2');
-                $('.dataTables_length select').addClass('form-select form-select-sm d-inline-block w-auto ms-1 me-1 glass-input');
-            }
-        });
+$(document).ready(function() {
+    $('#usersTable').DataTable({
+        pageLength: 10,
+        language: { search: '', searchPlaceholder: 'Search users…' },
+        dom: "<'row mb-3'<'col-md-6'l><'col-md-6 d-flex justify-content-end'f>>" +
+             "<'row'<'col-sm-12'tr>>" +
+             "<'row mt-3'<'col-md-5'i><'col-md-7 d-flex justify-content-end'p>>",
+        drawCallback: function() {
+            $('.dataTables_filter input').addClass('glass-input ms-2');
+            $('.dataTables_length select').addClass('form-select form-select-sm d-inline-block w-auto ms-1 me-1 glass-input');
+        }
     });
+});
 </script>
 {% endblock %}
