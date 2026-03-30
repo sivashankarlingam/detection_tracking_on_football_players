@@ -29,6 +29,10 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
+# Security settings for Render's HTTPS proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'https://*.127.0.0.1']
+
 
 # Application definition
 
