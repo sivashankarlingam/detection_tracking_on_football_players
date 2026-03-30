@@ -42,12 +42,12 @@ class FootballTracker:
 
         # Use avc1 (H.264) for maximum compatibility with web browsers
         # Fallback to mp4v if avc1 is not supported by the system's ffmpeg
-        fourcc = cv2.VideoWriter_fourcc(*'avc1')
+        import cv2
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
         
         if not out.isOpened():
-            print("avc1 codec failed, falling back to mp4v")
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            fourcc = cv2.VideoWriter_fourcc(*'avc1')
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
         if not out.isOpened():

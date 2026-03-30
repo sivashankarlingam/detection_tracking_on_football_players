@@ -45,6 +45,18 @@ def upload_video(request):
 def check_status(request, analysis_id):
     try:
         analysis = VideoAnalysis.objects.get(id=analysis_id)
+        if analysis.status == 'Failed':
+            import os
+            from django.conf import settings
+            error_log_path = os.path.join(settings.MEDIA_ROOT, 'videos', 'output', f"error_{analysis_id}.txt")
+            error_msg = "Unknown error occurred on server."
+            if os.path.exists(error_log_path):
+                with open(error_log_path, 'r') as err_file:
+                    error_msg = err_file.read()
+            return JsonResponse({
+                'status': analysis.status,
+                'error_details': error_msg
+            })
         return JsonResponse({
             'status': analysis.status,
             'progress': analysis.progress,

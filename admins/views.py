@@ -1,7 +1,9 @@
 # Create your views here.
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from users.models import UserRegistrationModel
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
 import time
 
 
@@ -27,6 +29,7 @@ def RegisterUsersView(request):
 
 
 
+@csrf_exempt
 def ActivaUsers(request):
     if request.method == 'POST':
         user_id = request.POST.get('uid')
@@ -35,9 +38,10 @@ def ActivaUsers(request):
                 UserRegistrationModel.objects.filter(id=user_id).update(status='activated')
                 messages.success(request, 'Member account successfully activated!')
             except Exception as e:
-                messages.error(request, f'Failed to activate account: {e}')
+                return HttpResponse(str(e))
     return redirect(f'/userDetails?t={int(time.time())}')
 
+@csrf_exempt
 def DeleteUsers(request):
     if request.method == 'POST':
         user_id = request.POST.get('uid')
@@ -46,9 +50,10 @@ def DeleteUsers(request):
                 UserRegistrationModel.objects.filter(id=user_id).delete()
                 messages.success(request, 'Member was permanently removed from the system.')
             except Exception as e:
-                messages.error(request, f'Error deleting member: {e}')
+                return HttpResponse(str(e))
     return redirect(f'/userDetails?t={int(time.time())}')
 
+@csrf_exempt
 def EditUsers(request):
     if request.method == 'POST':
         user_id = request.POST.get('uid')
@@ -68,7 +73,5 @@ def EditUsers(request):
                 user.save()
                 messages.success(request, f'Profile for {user.name} updated successfully.')
             except Exception as e:
-                messages.error(request, f'Failed to update profile: {e}')
+                return HttpResponse(str(e))
     return redirect(f'/userDetails?t={int(time.time())}')
-
-

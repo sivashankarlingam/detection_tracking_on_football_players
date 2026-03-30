@@ -49,9 +49,13 @@ def process_video_task(analysis_id):
         try:
             analysis = VideoAnalysis.objects.get(id=analysis_id)
             analysis.status = 'Failed'
+            import traceback
+            error_log_path = os.path.join(settings.MEDIA_ROOT, 'videos', 'output', f"error_{analysis_id}.txt")
+            with open(error_log_path, 'w') as err_file:
+                err_file.write(traceback.format_exc())
             analysis.save()
-        except:
-            pass
+        except Exception as inner_e:
+            print(f"Failed to save error state: {inner_e}")
 
 def trigger_video_processing(analysis_id):
     thread = threading.Thread(target=process_video_task, args=(analysis_id,))
