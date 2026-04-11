@@ -190,21 +190,26 @@ def result(request, analysis_id):
             context_user = None
 
         context = {
-            'video_url':          fs_url(analysis.output_video) if analysis.output_video else '',
-            'original_video_url': fs_url(analysis.input_video)  if analysis.input_video  else '',
+            'video_url':          analysis.output_video.url if analysis.output_video else '',
+            'original_video_url': analysis.input_video.url  if analysis.input_video  else '',
             'status':      analysis.status,
             'progress':    analysis.progress,
             'analysis_id': analysis.id,
             'logged_in_user': context_user,
         }
 
-        # Load JSON metrics if available
+        # Safely try to load JSON metrics from the local temp directory
         metrics = {}
-        if analysis.output_video:
-            json_path = analysis.output_video.path.rsplit('.', 1)[0] + "_metrics.json"
-            if os.path.exists(json_path):
-                with open(json_path, 'r') as f:
-                    metrics = json.load(f)
+        if analysis.status == 'Completed':
+            try:
+                # The pipeline saves the metrics next to the output video in the local temp directory
+                temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
+                json_path = os.path.join(temp_dir, f"output_{analysis.id}_metrics.json")
+                if os.path.exists(json_path):
+                    with open(json_path, 'r') as f:
+                        metrics = json.load(f)
+            except Exception as e:
+                print(f"DEBUG: Could not load JSON metrics locally: {e}")
 
         speeds      = metrics.get('player_speeds',    {})
         distances   = metrics.get('player_distances', {})
@@ -226,9 +231,13 @@ def result(request, analysis_id):
         context['max_ball_speed'] = max_ball_speed
 
     except Exception as e:
-        print("Error in result parsing:", e)
+        print("CRITICAL Error in result parsing:", e)
+        # We must provide basic fallback variables so the template safely unrolls
         context = {
-            'video_url': '', 'original_video_url': '',
+            'status': 'Failed',
+            'progress': 0,
+            'video_url': '',
+            'original_video_url': '',
             'speed_labels': '[]', 'speed_data': '[]',
             'dist_labels': '[]', 'dist_data': '[]',
             'possession_data': '[]', 'max_ball_speed': 0,
