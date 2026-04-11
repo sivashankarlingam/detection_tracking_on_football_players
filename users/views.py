@@ -76,7 +76,7 @@ def UserLoginCheck(request):
                     request.session['loggeduser'] = check.name
                     request.session['loginid'] = loginid
                     request.session['email'] = check.email
-                    return redirect('UserHome')
+                    return redirect('prediction')
                 else:
                     messages.error(request, 'Your Account is not activated yet.')
                     return render(request, 'UserLogin.html')

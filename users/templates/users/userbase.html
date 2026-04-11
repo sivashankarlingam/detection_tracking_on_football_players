@@ -19,7 +19,7 @@
             <button onclick="history.back()" class="mr-3 text-emerald-400 hover:text-emerald-300 transition-colors duration-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)] hover:bg-emerald-500/10 p-1.5 rounded-full" title="Go Back">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </button>
-            <a href="{% url 'UserHome' %}" class="logo-glow text-2xl font-extrabold tracking-tight flex items-center">
+            <a href="{% url 'prediction' %}" class="logo-glow text-2xl font-extrabold tracking-tight flex items-center">
                 <svg class="w-7 h-7 mr-2 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -31,11 +31,11 @@
         <div class="flex items-center space-x-6">
             <!-- Navigation Links (Middle/Right) -->
             <div class="hidden md:flex items-center space-x-8 mr-6">
-                <a href="{% url 'UserHome' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'UserHome' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">
-                    Dashboard Home
-                </a>
                 <a href="{% url 'prediction' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'prediction' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">
                     Analyze Video
+                </a>
+                <a href="{% url 'UserHome' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'UserHome' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">
+                    Analysis History
                 </a>
             </div>
 
