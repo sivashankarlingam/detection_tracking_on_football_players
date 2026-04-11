@@ -25,12 +25,26 @@ def process_video_task(analysis_id):
         from .ai_pipeline import FootballTracker
         tracker = FootballTracker()
 
+        last_progress_update = 0
+
         def update_progress(p):
-            # Fetch instance inside to avoid stale object states
-            from .models import VideoAnalysis
-            v = VideoAnalysis.objects.get(id=analysis_id)
-            v.progress = min(p, 99)
-            v.save()
+            nonlocal last_progress_update
+            # Only update if progress increases by at least 5% or hits 99
+            if p >= last_progress_update + 5 or p >= 99:
+                for attempt in range(5):
+                    try:
+                        # Fetch instance inside to avoid stale object states
+                        from .models import VideoAnalysis
+                        v = VideoAnalysis.objects.get(id=analysis_id)
+                        v.progress = min(p, 99)
+                        v.save()
+                        last_progress_update = p
+                        break
+                    except Exception as e:
+                        if 'locked' in str(e).lower() or 'operationalerror' in str(type(e)).lower():
+                            time.sleep(0.5)
+                        else:
+                            break
 
         # Run the AI pipeline
         tracker.process_video(input_path, output_path, update_progress)
@@ -49,13 +63,9 @@ def process_video_task(analysis_id):
         try:
             analysis = VideoAnalysis.objects.get(id=analysis_id)
             analysis.status = 'Failed'
-            import traceback
-            error_log_path = os.path.join(settings.MEDIA_ROOT, 'videos', 'output', f"error_{analysis_id}.txt")
-            with open(error_log_path, 'w') as err_file:
-                err_file.write(traceback.format_exc())
             analysis.save()
-        except Exception as inner_e:
-            print(f"Failed to save error state: {inner_e}")
+        except:
+            pass
 
 def trigger_video_processing(analysis_id):
     thread = threading.Thread(target=process_video_task, args=(analysis_id,))

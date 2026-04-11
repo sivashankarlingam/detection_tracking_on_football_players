@@ -1,77 +1,71 @@
-# Create your views here.
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from users.models import UserRegistrationModel
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
-import time
 
 
-# Create your views here.
 def AdminLoginCheck(request):
     if request.method == 'POST':
         usrid = request.POST.get('loginid')
-        pswd = request.POST.get('pswd')
-        print("User ID is = ", usrid)
+        pswd  = request.POST.get('pswd')
         if usrid == 'admin' and pswd == 'admin':
+            request.session['is_admin'] = True   # FIX: set session flag so AdminHome guard works
             return redirect('AdminHome')
-
         else:
-            messages.success(request, 'Please Check Your Login Details')
+            # FIX: was messages.success (green toast) for a FAILED login — corrected to messages.error
+            messages.error(request, 'Invalid credentials. Please check your Login ID and Password.')
     return render(request, 'AdminLogin.html', {})
-
 
 
 def RegisterUsersView(request):
     data = UserRegistrationModel.objects.all()
-    return render(request, 'admins/viewregisterusers.html', context={'data': data})
+    return render(request, 'admins/viewregisterusers.html', {'data': data})
 
 
-
-
-@csrf_exempt
 def ActivaUsers(request):
-    if request.method == 'POST':
-        user_id = request.POST.get('uid')
+    if request.method == 'GET':
+        user_id = request.GET.get('uid')
         if user_id:
-            try:
-                UserRegistrationModel.objects.filter(id=user_id).update(status='activated')
-                messages.success(request, 'Member account successfully activated!')
-            except Exception as e:
-                return HttpResponse(str(e))
-    return redirect(f'/userDetails?t={int(time.time())}')
+            UserRegistrationModel.objects.filter(id=user_id).update(status='activated')
+    return redirect('RegisterUsersView')
 
-@csrf_exempt
+
 def DeleteUsers(request):
-    if request.method == 'POST':
-        user_id = request.POST.get('uid')
+    if request.method == 'GET':
+        user_id = request.GET.get('uid')
         if user_id:
-            try:
-                UserRegistrationModel.objects.filter(id=user_id).delete()
-                messages.success(request, 'Member was permanently removed from the system.')
-            except Exception as e:
-                return HttpResponse(str(e))
-    return redirect(f'/userDetails?t={int(time.time())}')
+            UserRegistrationModel.objects.filter(id=user_id).delete()
+            messages.success(request, 'User deleted successfully!')
+    return redirect('RegisterUsersView')
 
-@csrf_exempt
+
 def EditUsers(request):
     if request.method == 'POST':
-        user_id = request.POST.get('uid')
+        user_id      = request.POST.get('uid')
+        name         = request.POST.get('name')
+        mobile       = request.POST.get('mobile')
+        email        = request.POST.get('email')
+        locality     = request.POST.get('locality')
+        address      = request.POST.get('address')
+        city         = request.POST.get('city')
+        state        = request.POST.get('state')
+        profile_image = request.FILES.get('profile_image')
+
         if user_id:
             try:
                 user = UserRegistrationModel.objects.get(id=user_id)
-                user.name = request.POST.get('name')
-                user.mobile = request.POST.get('mobile')
-                user.email = request.POST.get('email')
-                user.address = request.POST.get('address')
-                user.city = request.POST.get('city')
-                user.state = request.POST.get('state')
+                user.name     = name
+                user.mobile   = mobile
+                user.email    = email
+                user.locality = locality
+                user.address  = address
+                user.city     = city
+                user.state    = state
                 
-                profile_image = request.FILES.get('profile_image')
                 if profile_image:
                     user.profile_image = profile_image
                 user.save()
-                messages.success(request, f'Profile for {user.name} updated successfully.')
-            except Exception as e:
-                return HttpResponse(str(e))
-    return redirect(f'/userDetails?t={int(time.time())}')
+                messages.success(request, 'User updated successfully!')
+            except UserRegistrationModel.DoesNotExist:
+                messages.error(request, 'User not found.')
+
+    return redirect('RegisterUsersView')

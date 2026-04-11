@@ -1,206 +1,71 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel — FP Track</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
-    <link rel="manifest" href="{% static 'manifest.json' %}">
-    <meta name="theme-color" content="#050d1f">
-    <style>
-        :root {
-            --blue:       #3b82f6;
-            --blue-lt:    #60a5fa;
-            --blue-dk:    #1d4ed8;
-            --blue-dim:   rgba(59,130,246,0.10);
-            --blue-glow:  rgba(59,130,246,0.32);
-            --cyan:       #38bdf8;
-            --cyan-dim:   rgba(56,189,248,0.10);
-            --green:      #22c55e;
-            --green-dim:  rgba(34,197,94,0.10);
-            --navy:       #050d1f;
-            --navy-2:     #0a1628;
-            --glass-bg:   rgba(10,22,40,0.80);
-            --glass-bg2:  rgba(15,31,61,0.88);
-            --border:     rgba(255,255,255,0.07);
-            --border-blue:rgba(59,130,246,0.20);
-            --text:       #e8f0fe;
-            --text-soft:  #7b93c4;
-            --text-muted: #3d5280;
-            --danger:     #f43f5e;
-            --sidebar-w:  260px;
-            --topbar-h:   62px;
-        }
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-        html{scroll-behavior:smooth;}
-        body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--navy);min-height:100vh;overflow-x:hidden;}
 
-        /* BG */
-        #admin-bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
-        #admin-bg .bg-photo{position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1920&q=70&auto=format&fit=crop');background-size:cover;background-position:center;opacity:0.28;}
-        #admin-bg .bg-fade{position:absolute;inset:0;background:linear-gradient(160deg,rgba(5,13,31,0.65) 0%,rgba(5,13,31,0.3) 50%,rgba(5,13,31,0.75) 100%);}
-        #admin-bg .bg-mesh{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 10% 10%,rgba(244,63,94,0.04) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 90% 90%,rgba(59,130,246,0.04) 0%,transparent 60%);}
-        #admin-bg .bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.02) 1px,transparent 1px);background-size:60px 60px;}
+{% block extra_css %}
+<style>
+    /* Override background strictly for Admin Dashboard */
+    .premium-bg {
+        background-image: linear-gradient(to bottom right, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.95)), url('/media/profiles/Download%20premium%20image%20of%20Football%20stadium%20sports%20player_%20by%20Ake%20about%20grass,%20football,%20sports,%20stadium,%20and%20person%2014534484.jpg') !important;
+    }
+</style>
+{% endblock %}
 
-        /* TOPBAR */
-        .admin-topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);z-index:200;display:flex;align-items:center;padding:0 1.5rem 0 0;background:rgba(5,13,31,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);}
-        .admin-topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(244,63,94,0.5) 40%,rgba(59,130,246,0.4) 60%,transparent);opacity:0.6;}
+{% block navbar %}
+<!-- Floating Pill Navbar for Admin Users -->
+<nav class="glass-panel glass-nav mt-4 mx-auto max-w-7xl sticky top-4 z-50 px-6 sm:px-8 py-3 w-[95%] border-[1.5px] border-amber-500/30">
+    <div class="flex items-center justify-between h-14">
+        <!-- Logo Left -->
+        <div class="flex-shrink-0 flex items-center">
+            <a href="{% url 'AdminHome' %}" class="logo-glow text-2xl font-extrabold tracking-tight flex items-center">
+                <svg class="w-7 h-7 mr-2 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                System<span class="text-amber-500 ml-1">Admin</span>
+            </a>
+            <span class="ml-4 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-xs font-bold text-amber-400 uppercase tracking-widest hidden sm:block">Control Panel</span>
+        </div>
 
-        .admin-brand-zone{min-width:320px;flex-shrink:0;display:flex;align-items:center;gap:12px;padding:0 1.25rem;border-right:1px solid var(--border);height:100%;}
-        .admin-brand-badge{width:36px;height:36px;border-radius:10px;background:linear-gradient(140deg,#f43f5e,#9f1239);display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;box-shadow:0 0 16px rgba(244,63,94,0.4);flex-shrink:0;padding:4px;overflow:hidden;}
-        .admin-brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;letter-spacing:0.5px;color:#fff;text-transform:uppercase;line-height:1.15;white-space:nowrap;}
-        .admin-brand-name em{color:var(--danger);font-style:normal;display:block;}
-        .admin-brand-sub{display:block;font-size:0.42rem;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--danger);margin-top:2px;opacity:0.85;}
+        <!-- Everything Else Right -->
+        <div class="flex items-center space-x-6">
+            <!-- Navigation Links (Middle/Right) -->
+            <div class="hidden md:flex items-center space-x-8 mr-4">
+                <a href="{% url 'AdminHome' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'AdminHome' %}text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]{% else %}text-white hover:text-amber-300{% endif %}">
+                    Dashboard Home
+                </a>
+                <a href="{% url 'RegisterUsersView' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'RegisterUsersView' %}text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]{% else %}text-white hover:text-amber-300{% endif %}">
+                    User Management
+                </a>
+            </div>
 
-        .admin-topbar-right{flex:1;display:flex;align-items:center;justify-content:space-between;padding-left:1.5rem;}
-        .admin-page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:#fff;}
-        .admin-page-title span{color:var(--text-muted);font-size:0.82rem;font-family:'DM Sans',sans-serif;font-weight:400;display:block;}
-
-        .admin-badge-pill{display:inline-flex;align-items:center;gap:10px;padding:0.4rem 1.25rem;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.25);border-radius:50px;font-size:0.78rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:0.8px;box-shadow:0 0 20px rgba(244,63,94,0.15);}
-        .admin-dot{width:8px;height:8px;border-radius:50%;background:#f43f5e;box-shadow:0 0 10px #f43f5e;animation:adotBlink 2s infinite;}
-        @keyframes adotBlink{0%,100%{opacity:1;}50%{opacity:0.3;}}
-
-        .db-hamburger{display:flex;align-items:center;justify-content:center;background:var(--navy-2);border:1px solid var(--border);border-radius:8px;padding:0.45rem 0.6rem;color:var(--text);font-size:1.15rem;cursor:pointer;margin-right:0.75rem;transition:all 0.22s;box-shadow:0 0 12px rgba(0,0,0,0.25);}
-        .db-hamburger:hover{border-color:var(--danger);color:var(--danger);box-shadow:0 0 20px rgba(244,63,94,0.15);}
-
-        /* SIDEBAR */
-        .admin-sidebar{position:fixed;top:var(--topbar-h);left:0;bottom:0;width:var(--sidebar-w);z-index:100;background:rgba(5,13,31,0.96);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 0.9rem 1.5rem;transition:transform 0.3s ease;}
-
-        .nav-group-label{font-size:0.58rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);padding:0 0.5rem;margin:1.1rem 0 0.5rem;}
-        .nav-group-label:first-child{margin-top:0;}
-
-        .sb-link{display:flex;align-items:center;gap:12px;padding:0.75rem 1rem;border-radius:12px;color:rgba(255,255,255,0.65);text-decoration:none;font-weight:600;font-size:0.9rem;transition:all 0.25s;margin-bottom:4px;border:1px solid transparent;position:relative;}
-        .sb-link:hover{background:rgba(244,63,94,0.08);color:#fff;transform:translateX(5px);}
-        .sb-link.active{background:rgba(244,63,94,0.15);color:#f87171;font-weight:800;border-color:rgba(244,63,94,0.25);box-shadow:0 4px 15px rgba(244,63,94,0.12);}
-        .sb-link i{font-size:1.1rem;transition:transform 0.2s;color:rgba(255,255,255,0.45);}
-        .sb-link.active i{color:#f87171;transform:scale(1.1);}
-        .sb-link:hover i{color:#f87171;}
-        .sb-link.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:3px;background:linear-gradient(180deg,#f43f5e,#f97316);border-radius:2px;}
-        .sb-link-danger{color:rgba(244,63,94,0.55);}
-        .sb-link-danger:hover{background:rgba(244,63,94,0.07);color:var(--danger);}
-
-        .sb-footer{margin-top:auto;padding-top:1.25rem;border-top:1px solid var(--border);}
-        .sb-footer-info{background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.15);border-radius:12px;padding:0.85rem 1rem;}
-        .sb-footer-info p{font-size:0.75rem;color:var(--text-soft);margin:0;line-height:1.5;}
-        .sb-footer-info strong{color:var(--danger);}
-
-        /* MAIN */
-        .admin-main{position:relative;z-index:1;margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh;}
-        .admin-inner{padding:2rem;}
-
-        /* SHARED GLASS COMPONENTS */
-        .glass-panel, .glass-card { background:var(--glass-bg2);border:1px solid var(--border);border-radius:20px;backdrop-filter:blur(28px);position:relative;overflow:hidden;transition:all 0.3s; }
-        .glass-panel:hover, .glass-card:hover { border-color:var(--border-blue);transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,0.25); }
-
-        .btn-glass{
-            display:flex;align-items:center;justify-content:center;gap:10px;padding:0.85rem 1.5rem;border-radius:13px;border:none;
-            background:linear-gradient(135deg,var(--blue-lt),var(--blue-dk));
-            color:#fff;font-family:'DM Sans',sans-serif;font-weight:800;font-size:0.95rem;
-            cursor:pointer;transition:all 0.28s;box-shadow:0 8px 24px var(--blue-glow);
-            position:relative;overflow:hidden;
-        }
-        .btn-glass:hover{transform:translateY(-2px);box-shadow:0 12px 36px var(--blue-glow);color:#fff;}
-        .btn-glass::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);transform:translateX(-100%);transition:transform 0.6s ease;}
-        .btn-glass:hover::after{transform:translateX(100%);}
-
-        /* Table overrides for dark theme */
-        .table{--bs-table-color:var(--text);--bs-table-bg:transparent;--bs-table-striped-bg:rgba(59,130,246,0.03);--bs-table-hover-bg:rgba(59,130,246,0.05);}
-        .table thead th{color:var(--text-soft);font-size:0.78rem;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;border-color:var(--border);}
-        .table tbody td{border-color:var(--border);vertical-align:middle;color:var(--text);}
-        .table-hover tbody tr:hover td{background:rgba(59,130,246,0.05);}
-
-        .glass-input{background:rgba(255,255,255,0.05)!important;border:1px solid var(--border)!important;border-radius:10px!important;color:var(--text)!important;font-family:'DM Sans',sans-serif!important;}
-        .glass-input:focus{background:rgba(59,130,246,0.07)!important;border-color:var(--border-blue)!important;box-shadow:0 0 0 3px rgba(59,130,246,0.12)!important;outline:none!important;color:var(--text)!important;}
-        .glass-input::placeholder{color:var(--text-muted)!important;}
-        select.glass-input option{background:var(--navy-2);color:var(--text);}
-
-        /* Modals */
-        .modal-content{background:var(--glass-bg2);border:1px solid var(--border);border-radius:20px;backdrop-filter:blur(32px);}
-        .modal-backdrop{background:rgba(0,0,0,0.7);}
-
-        /* Primary/muted text */
-        .text-primary-dark{color:var(--text)!important;}
-        .text-muted{color:var(--text-muted)!important;}
-
-        /* DataTables dark */
-        .dataTables_wrapper .dataTables_info,.dataTables_wrapper .dataTables_paginate .paginate_button,.dataTables_wrapper .dataTables_length,.dataTables_wrapper .dataTables_filter{color:var(--text-soft)!important;font-size:0.82rem;}
-        .dataTables_wrapper .dataTables_paginate .paginate_button:hover{background:var(--blue-dim)!important;border-color:var(--border-blue)!important;color:var(--blue-lt)!important;border-radius:8px;}
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current{background:var(--blue-dim)!important;border-color:var(--border-blue)!important;color:var(--blue-lt)!important;border-radius:8px;}
-
-        /* Alert */
-        .alert-success.glass-panel{background:rgba(34,197,94,0.08)!important;border-color:rgba(34,197,94,0.2)!important;color:var(--green)!important;}
-        .alert .btn-close{filter:invert(1) opacity(0.5);}
-
-        ::-webkit-scrollbar{width:4px;}
-        ::-webkit-scrollbar-track{background:var(--navy);}
-        ::-webkit-scrollbar-thumb{background:rgba(59,130,246,0.15);border-radius:3px;}
-
-        @media(max-width:991px){.admin-sidebar{transform:translateX(-100%);}.admin-sidebar.open{transform:translateX(0);}.admin-main{margin-left:0;}.admin-brand-zone{width:auto;min-width:auto;border-right:none;}.admin-inner{padding:1.25rem;}}
-        .admin-sidebar{transform:translateX(-100%);}
-        .admin-sidebar.open{transform:translateX(0);}
-        .admin-main{margin-left:0;}
-    </style>
-</head>
-<body>
-<div id="admin-bg">
-    <div class="bg-photo"></div><div class="bg-fade"></div><div class="bg-mesh"></div><div class="bg-grid"></div>
-</div>
-
-<!-- TOPBAR -->
-<header class="admin-topbar">
-    <div class="admin-brand-zone">
-        <button class="db-hamburger" id="adminHamburger" aria-label="Menu"><i class="bi bi-list" id="adminHamIcon"></i></button>
-        <div class="admin-brand-badge" style="background:var(--navy-2);padding:2px;overflow:hidden;"><img src="{% static 'img/football_logo.png' %}" alt="Logo" style="width:100%;height:100%;object-fit:contain;"></div>
-        <div><div class="admin-brand-name">ADMIN <em>PANEL</em></div><span class="admin-brand-sub" style="color:var(--danger);font-weight:700;">FOOTBALL PLAYER TRACK</span></div>
-    </div>
-    <div class="admin-topbar-right">
-        <div><div class="admin-page-title" id="admin-page-title">Dashboard</div></div>
-        <div class="admin-badge-pill"><div class="admin-dot"></div> Admin Session</div>
-    </div>
-</header>
-
-<!-- SIDEBAR -->
-<aside class="admin-sidebar" id="adminSidebar">
-    <div class="nav-group-label">Management</div>
-    <a href="{% url 'AdminHome' %}" class="sb-link {% if request.resolver_match.url_name == 'AdminHome' %}active{% endif %}"><i class="bi bi-house-door-fill"></i> Dashboard Home</a>
-    <a href="{% url 'RegisterUsersView' %}" class="sb-link {% if request.resolver_match.url_name == 'RegisterUsersView' %}active{% endif %}"><i class="bi bi-people-fill"></i> User Management</a>
-    <div class="nav-group-label">System</div>
-    <a href="{% url 'index' %}" class="sb-link sb-link-danger"><i class="bi bi-box-arrow-right"></i> Logout</a>
-    <div class="sb-footer">
-        <div class="sb-footer-info">
-            <p><strong>Admin Access</strong><br>All actions are logged and monitored for security purposes.</p>
+            <!-- Logout Link -->
+            <a href="{% url 'logout' %}" class="px-5 py-2.5 rounded-full border border-red-500/50 text-red-500 font-bold text-sm tracking-wide hover:bg-red-500 hover:text-white transition-all duration-300 hover:shadow-[0_0_15px_rgba(239,68,68,0.5)] flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Logout Access
+            </a>
         </div>
     </div>
-</aside>
+</nav>
 
-<!-- MAIN -->
-<main class="admin-main">
-    <div class="admin-inner">{% block contents %}{% endblock %}</div>
-</main>
+<!-- Admin Navigation Hover Override for Amber Theme instead of Emerald -->
+<style>
+    .nav-link:hover { color: #fcd34d !important; /* amber-300 */ }
+    .nav-link::after { background-color: #fbbf24 !important; /* amber-400 */ }
+    .logo-glow:hover { text-shadow: 0 0 15px rgba(245, 158, 11, 0.8) !important; color: #fbbf24 !important; }
+</style>
+{% endblock %}
 
-<div id="adminOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px);"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-<script>
-const hamburger=document.getElementById('adminHamburger'),sidebar=document.getElementById('adminSidebar'),overlay=document.getElementById('adminOverlay'),hamIcon=document.getElementById('adminHamIcon');
-function openSidebar(){sidebar.classList.add('open');overlay.style.display='block';hamIcon.className='bi bi-x-lg';}
-function closeSidebar(){sidebar.classList.remove('open');overlay.style.display='none';hamIcon.className='bi bi-list';}
-hamburger.addEventListener('click',(e)=>{e.stopPropagation();sidebar.classList.contains('open')?closeSidebar():openSidebar();});
-overlay.addEventListener('click',closeSidebar);
-sidebar.querySelectorAll('.sb-link').forEach(a=>a.addEventListener('click',()=>{if(window.innerWidth<992)closeSidebar();}));
-const activeLink=document.querySelector('.sb-link.active');
-if(activeLink){const txt=activeLink.textContent.trim();const el=document.getElementById('admin-page-title');if(el&&txt)el.textContent=txt;}
-if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}
-</script>
-{% block extra_scripts %}{% endblock %}
-</body>
-</html>
+{% block messages %}
+{% if messages %}
+<div class="max-w-4xl mx-auto mb-6">
+    {% for message in messages %}
+    <div class="glass-panel p-4 mb-3 flex items-center {% if message.tags == 'success' %}border-emerald-500/30{% else %}border-red-500/30{% endif %}">
+        {% if message.tags == 'success' %}
+            <svg class="w-6 h-6 text-emerald-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="text-emerald-100 font-medium">{{ message }}</span>
+        {% else %}
+            <svg class="w-6 h-6 text-red-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="text-red-100 font-medium">{{ message }}</span>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

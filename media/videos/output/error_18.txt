@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "C:\raw_project\Football_Player_Detection_and_Tracking\users\tasks.py", line 36, in process_video_task
-    tracker.process_video(input_path, output_path, update_progress)
-  File "C:\raw_project\Football_Player_Detection_and_Tracking\users\ai_pipeline.py", line 30, in process_video
-    cap = cv2.VideoCapture(input_path)
-UnboundLocalError: local variable 'cv2' referenced before assignment

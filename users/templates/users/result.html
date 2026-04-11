@@ -1,181 +1,268 @@
 {% extends 'users/userbase.html' %}
 {% load static %}
 {% block contents %}
-<style>
-.result-hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.75rem;}
-.result-hdr-left h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.85rem;letter-spacing:0.3px;color:#fff;line-height:1;}
-.result-hdr-left h2 span{color:var(--cyan);}
-.result-hdr-left p{font-size:0.82rem;color:var(--text-muted);margin-top:0.25rem;}
 
-.btn-dl{
-    display:inline-flex;align-items:center;gap:10px;padding:0.8rem 1.6rem;border-radius:14px;border:none;
-    background:linear-gradient(135deg,var(--blue-lt),var(--blue-dk));
-    color:#fff;font-family:'DM Sans',sans-serif;font-weight:800;font-size:0.92rem;
-    cursor:pointer;transition:all 0.28s;box-shadow:0 6px 20px var(--blue-glow);
-    text-decoration:none;position:relative;overflow:hidden;
-}
-.btn-dl:hover{transform:translateY(-3px);box-shadow:0 12px 36px var(--blue-glow);color:#fff;}
-.btn-dl::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);transform:translateX(-100%);transition:transform 0.6s ease;}
-.btn-dl:hover::after{transform:translateX(100%);}
-
-.video-wrap{background:var(--glass-bg2);border:1px solid var(--border);border-radius:18px;overflow:hidden;height:100%;}
-.video-wrap-blue{border-color:var(--border-blue);}
-.video-panel-hdr{background:rgba(255,255,255,0.025);border-bottom:1px solid var(--border);padding:0.9rem 1.25rem;display:flex;align-items:center;gap:8px;}
-.video-panel-hdr-blue{border-bottom-color:var(--border-blue);background:rgba(59,130,246,0.04);}
-.vph-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;}
-.vph-title{font-weight:700;font-size:0.9rem;color:#fff;}
-.vph-sub{font-size:0.7rem;color:var(--text-muted);}
-.video-ratio{position:relative;padding-bottom:56.25%;background:#000;}
-.video-ratio video,.video-ratio .video-placeholder{position:absolute;inset:0;width:100%;height:100%;}
-.video-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);}
-
-.proc-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0.75rem;}
-.proc-spinner{width:48px;height:48px;border-radius:50%;border:3px solid var(--blue-dim);border-top-color:var(--blue-lt);animation:spin 0.9s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.proc-text{font-weight:700;color:var(--blue-lt);font-size:0.95rem;}
-.proc-sub{font-size:0.78rem;color:var(--text-muted);}
-
-.metric-card{background:var(--glass-bg2);border:1px solid var(--border);border-radius:16px;padding:1.25rem;text-align:center;transition:border-color 0.22s;}
-.metric-card:hover{border-color:var(--border-blue);}
-.metric-val{font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--blue-lt),var(--cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-.metric-unit{font-size:0.8rem;color:var(--text-muted);font-weight:600;margin-top:2px;}
-.metric-lbl{font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-top:0.4rem;}
-
-.chart-card{background:var(--glass-bg2);border:1px solid var(--border);border-radius:18px;padding:1.5rem;height:100%;transition:border-color 0.22s;}
-.chart-card:hover{border-color:rgba(59,130,246,0.15);}
-.chart-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:#fff;letter-spacing:0.3px;margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
-
-.big-stat{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;}
-.big-stat-val{font-family:'Syne',sans-serif;font-size:5rem;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--blue-lt),var(--cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-.big-stat-unit{font-size:1.2rem;color:var(--text-soft);font-weight:600;}
-.big-stat-lbl{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-top:0.5rem;}
-
-.back-link{display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-muted);text-decoration:none;transition:color 0.2s;margin-bottom:1.25rem;}
-.back-link:hover{color:var(--blue-lt);}
-</style>
-
-<a href="{% url 'UserHome' %}" class="back-link"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
-
-<div class="result-hdr">
-    <div class="result-hdr-left">
-        <h2>Analysis <span>Results</span></h2>
-        <p>AI-generated player detection &amp; tracking report</p>
+<div class="w-full">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div>
+            <h2 class="text-3xl font-extrabold text-white tracking-tight">Analysis Results</h2>
+            <p class="text-gray-400 font-medium mt-1">AI-generated player detection and tracking</p>
+        </div>
+        {% if status == 'Completed' %}
+        <a href="{{ video_url }}" download="output_detected_video.mp4" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold py-2.5 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Download Video
+        </a>
+        {% endif %}
     </div>
-    {% if status == 'Completed' %}
-    <a href="{{ video_url }}" download="fp_track_output.mp4" class="btn-dl"><i class="bi bi-download"></i> Download Video</a>
-    {% endif %}
-</div>
 
-<div class="d-flex gap-2 mb-4 flex-wrap">
-    {% if status == 'Completed' %}<span class="fp-tag fp-tag-green"><i class="bi bi-check-circle-fill"></i> Completed</span>
-    {% elif status == 'Processing' or status == 'Pending' %}<span class="fp-tag" style="background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);"><i class="bi bi-hourglass-split"></i> Processing</span>
-    {% else %}<span class="fp-tag fp-tag-red"><i class="bi bi-x-circle-fill"></i> Failed</span>{% endif %}
-    <span class="fp-tag fp-tag-blue"><i class="bi bi-cpu"></i> YOLOv8</span>
-    <span class="fp-tag fp-tag-cyan"><i class="bi bi-diagram-3"></i> ByteTrack</span>
-</div>
-
-<!-- VIDEO PLAYERS -->
-<div class="row g-4 mb-4">
-    <div class="col-lg-6">
-        <div class="video-wrap">
-            <div class="video-panel-hdr">
-                <div class="vph-icon" style="background:rgba(255,255,255,0.04);color:var(--text-soft);"><i class="bi bi-camera-video"></i></div>
-                <div><div class="vph-title">Original Footage</div><div class="vph-sub">Raw match video</div></div>
-            </div>
-            <div class="video-ratio">
+    <!-- Side-by-Side Video Players -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Input Video Container -->
+        <div class="glass-panel p-6 h-full flex flex-col">
+            <h5 class="text-lg font-bold text-white mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                Original Footage
+            </h5>
+            <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-inner flex items-center justify-center border border-white/5 flex-grow">
                 {% if original_video_url %}
-                <video controls style="object-fit:contain;background:#000;"><source src="{{ original_video_url }}" type="video/mp4"></video>
+                <video controls class="absolute inset-0 w-full h-full object-contain">
+                    <source src="{{ original_video_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
                 {% else %}
-                <div class="video-placeholder"><i class="bi bi-film" style="font-size:3rem;color:var(--text-muted);opacity:0.4;"></i><div style="font-size:0.82rem;color:var(--text-muted);margin-top:0.5rem;">Original not available</div></div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="video-wrap video-wrap-blue">
-            <div class="video-panel-hdr video-panel-hdr-blue">
-                <div class="vph-icon" style="background:var(--blue-dim);color:var(--blue-lt);"><i class="bi bi-bullseye"></i></div>
-                <div><div class="vph-title" style="color:var(--blue-lt);">AI Processed Output</div><div class="vph-sub">Detection &amp; tracking overlay</div></div>
-            </div>
-            <div class="video-ratio">
-                {% if status == 'Completed' %}
-                <video controls autoplay muted loop style="object-fit:contain;background:#000;"><source src="{{ video_url }}" type="video/mp4"></video>
-                {% elif status == 'Failed' %}
-                <div class="video-placeholder"><div style="text-align:center;"><i class="bi bi-exclamation-triangle-fill" style="font-size:2.5rem;color:var(--danger);"></i><div style="font-weight:700;color:var(--danger);font-size:0.95rem;margin-top:0.5rem;">Processing Failed</div><div style="font-size:0.78rem;color:var(--text-muted);">Please try re-uploading</div></div></div>
-                {% else %}
-                <div class="video-placeholder">
-                    <div class="proc-overlay">
-                        <div class="proc-spinner"></div>
-                        <div class="proc-text">AI is Analyzing Video…</div>
-                        <div class="proc-sub">Page refreshes automatically every 5 seconds</div>
-                        <span class="fp-tag fp-tag-blue" style="font-size:0.62rem;margin-top:0.5rem;"><i class="bi bi-cpu"></i> YOLOv8 · ByteTrack Active</span>
-                    </div>
+                <div class="flex flex-col items-center justify-center text-gray-500">
+                    <svg class="w-16 h-16 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path></svg>
+                    <span class="font-medium text-sm">Original video unavailable</span>
                 </div>
-                <script>setTimeout(()=>window.location.reload(),5000);</script>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- AI Processed Video Container -->
+        <div class="glass-panel p-6 h-full border border-emerald-500/30 flex flex-col shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+            <h5 class="text-lg font-bold text-white mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                AI Processed Analytics
+            </h5>
+            <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-inner border border-emerald-500/20 flex-grow">
+                {% if status == 'Completed' %}
+                <video controls autoplay muted loop class="absolute inset-0 w-full h-full object-contain">
+                    <source src="{{ video_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                {% elif status == 'Failed' %}
+                <div class="absolute inset-0 flex flex-col justify-center items-center bg-red-900/10">
+                    <svg class="w-16 h-16 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <h5 class="text-red-400 font-bold text-lg">Processing Failed</h5>
+                    <p class="text-red-400/70 text-sm mt-1">There was an error generating the analytics video.</p>
+                </div>
+                {% else %}
+                <div class="absolute inset-0 flex flex-col justify-center items-center bg-amber-900/10 p-6 text-center">
+                    <svg class="animate-spin h-12 w-12 text-amber-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <h6 class="text-amber-400 font-bold text-lg mb-1">AI is Analyzing Video...</h6>
+                    <p class="text-amber-400/60 text-sm">Please wait. Page will refresh automatically.</p>
+                </div>
+                <script>
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 5000);
+                </script>
                 {% endif %}
             </div>
         </div>
     </div>
-</div>
 
-{% if status == 'Completed' %}
-<!-- KEY METRICS -->
-<div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3"><div class="metric-card"><div class="metric-val">{{ max_ball_speed|default:"—" }}</div><div class="metric-unit">km / h</div><div class="metric-lbl">Max Ball Speed</div></div></div>
-    <div class="col-6 col-lg-3"><div class="metric-card"><div class="metric-val" style="background:linear-gradient(135deg,var(--green),#16a34a);-webkit-background-clip:text;background-clip:text;">22</div><div class="metric-unit">players</div><div class="metric-lbl">Total Tracked</div></div></div>
-    <div class="col-6 col-lg-3"><div class="metric-card"><div class="metric-val" style="background:linear-gradient(135deg,var(--cyan),#0891b2);-webkit-background-clip:text;background-clip:text;">30+</div><div class="metric-unit">fps</div><div class="metric-lbl">Processing Rate</div></div></div>
-    <div class="col-6 col-lg-3"><div class="metric-card"><div class="metric-val" style="background:linear-gradient(135deg,#a78bfa,#7c3aed);-webkit-background-clip:text;background-clip:text;">98%</div><div class="metric-unit">accuracy</div><div class="metric-lbl">Detection Rate</div></div></div>
-</div>
+    <!-- Analytics Dashboard with Chart.js -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="lg:col-span-2">
+            <div class="glass-panel p-6 h-full">
+                <h5 class="text-lg font-bold text-white mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Player Movement Speed (Top 5)
+                </h5>
+                <div class="w-full relative h-[300px]">
+                    <canvas id="speedChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="lg:col-span-1">
+            <div class="glass-panel p-6 h-full">
+                <h5 class="text-lg font-bold text-white mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                    Possession Stats
+                </h5>
+                <div class="w-full relative h-[300px] flex justify-center items-center">
+                    <canvas id="possessionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- CHARTS ROW 1 -->
-<div class="row g-4 mb-4">
-    <div class="col-lg-8"><div class="chart-card"><div class="chart-title"><i class="bi bi-lightning-charge-fill" style="color:var(--blue-lt);"></i>Player Movement Speed — Top 5</div><canvas id="speedChart" height="100"></canvas></div></div>
-    <div class="col-lg-4">
-        <div class="chart-card">
-            <div class="chart-title"><i class="bi bi-pie-chart-fill" style="color:var(--cyan);"></i>Ball Possession</div>
-            <canvas id="possessionChart"></canvas>
-            <div class="d-flex justify-content-around mt-3">
-                <div style="text-align:center;"><div style="width:12px;height:12px;border-radius:3px;background:var(--blue-lt);margin:0 auto 4px;"></div><div style="font-size:0.68rem;color:var(--text-muted);">Team A</div></div>
-                <div style="text-align:center;"><div style="width:12px;height:12px;border-radius:3px;background:var(--cyan);margin:0 auto 4px;"></div><div style="font-size:0.68rem;color:var(--text-muted);">Team B</div></div>
-                <div style="text-align:center;"><div style="width:12px;height:12px;border-radius:3px;background:#6b7280;margin:0 auto 4px;"></div><div style="font-size:0.68rem;color:var(--text-muted);">Contested</div></div>
+    <!-- Second Row of Analytics -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+        <div class="lg:col-span-2">
+            <div class="glass-panel p-6 h-full">
+                <h5 class="text-lg font-bold text-white mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Distance Covered (Top 5)
+                </h5>
+                <div class="w-full relative h-[300px]">
+                    <canvas id="distanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="lg:col-span-1">
+            <div class="glass-panel p-6 h-full flex flex-col align-items-center justify-center text-center">
+                <h5 class="text-lg font-bold text-white mb-auto flex items-center self-start w-full">
+                    <svg class="w-5 h-5 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path></svg>
+                    Max Ball Speed
+                </h5>
+                <div class="text-6xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500 drop-shadow-xl my-6">
+                    {{ max_ball_speed|default:"0.0" }}
+                </div>
+                <div class="text-gray-400 text-xl font-bold tracking-widest mt-auto">KM/H</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- CHARTS ROW 2 -->
-<div class="row g-4 mb-4">
-    <div class="col-lg-8"><div class="chart-card"><div class="chart-title"><i class="bi bi-geo-alt-fill" style="color:var(--green);"></i>Distance Covered — Top 5</div><canvas id="distanceChart" height="100"></canvas></div></div>
-    <div class="col-lg-4">
-        <div class="chart-card" style="min-height:200px;display:flex;flex-direction:column;">
-            <div class="chart-title"><i class="bi bi-fire" style="color:var(--danger);"></i>Max Ball Speed</div>
-            <div class="big-stat" style="flex:1;"><div class="big-stat-val">{{ max_ball_speed|default:"0.0" }}</div><div class="big-stat-unit">km / h</div><div class="big-stat-lbl">Peak velocity recorded</div></div>
-        </div>
-    </div>
-</div>
-{% endif %}
-{% endblock %}
-
-{% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded",function(){
-    if(!document.getElementById('speedChart'))return;
-    Chart.defaults.color='#7b93c4';
-    Chart.defaults.borderColor='rgba(59,130,246,0.08)';
-    Chart.defaults.font.family="'DM Sans', sans-serif";
+    document.addEventListener("DOMContentLoaded", function() {
+        try {
+            const speedLabels = JSON.parse('{{ speed_labels|default:"[]"|escapejs }}' || '[]');
+            const speedData = JSON.parse('{{ speed_data|default:"[]"|escapejs }}' || '[]');
+            const posData = JSON.parse('{{ possession_data|default:"[0, 0, 0]"|escapejs }}' || '[0, 0, 0]');
+            const distLabels = JSON.parse('{{ dist_labels|default:"[]"|escapejs }}' || '[]');
+            const distData = JSON.parse('{{ dist_data|default:"[]"|escapejs }}' || '[]');
 
-    const speedLabels=JSON.parse('{{ speed_labels|default:"[]"|escapejs }}'||'[]');
-    const speedData=JSON.parse('{{ speed_data|default:"[]"|escapejs }}'||'[]');
-    const posData=JSON.parse('{{ possession_data|default:"[0,0,0]"|escapejs }}'||'[0,0,0]');
-    const distLabels=JSON.parse('{{ dist_labels|default:"[]"|escapejs }}'||'[]');
-    const distData=JSON.parse('{{ dist_data|default:"[]"|escapejs }}'||'[]');
+            // Chart Defaults for Dark Theme
+            Chart.defaults.color = '#94a3b8'; // slate-400
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+            Chart.defaults.font.family = "'Inter', sans-serif";
 
-    new Chart(document.getElementById('speedChart').getContext('2d'),{type:'bar',data:{labels:speedLabels.length?speedLabels:['Player 1','Player 2','Player 3','Player 4','Player 5'],datasets:[{label:'Max Speed (km/h)',data:speedData.length?speedData:[34,31,29,28,26],backgroundColor:['rgba(96,165,250,0.55)','rgba(96,165,250,0.45)','rgba(56,189,248,0.4)','rgba(56,189,248,0.3)','rgba(56,189,248,0.22)'],borderColor:'rgba(96,165,250,0.8)',borderWidth:1,borderRadius:8}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(59,130,246,0.06)'},ticks:{color:'#7b93c4'}},y:{beginAtZero:true,grid:{color:'rgba(59,130,246,0.06)'},ticks:{color:'#7b93c4'}}}}});
+            // Speed Chart
+            const speedCtx = document.getElementById('speedChart').getContext('2d');
+            new Chart(speedCtx, {
+                type: 'bar',
+                data: {
+                    labels: speedLabels.length > 0 ? speedLabels : ['No Data'],
+                    datasets: [{
+                        label: 'Max Speed (km/h)',
+                        data: speedData.length > 0 ? speedData : [0],
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)', // blue-500
+                        borderColor: 'rgba(96, 165, 250, 1)',      // blue-400
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        hoverBackgroundColor: 'rgba(59, 130, 246, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
 
-    new Chart(document.getElementById('possessionChart').getContext('2d'),{type:'doughnut',data:{labels:['Team A','Team B','Contested'],datasets:[{data:posData.some(v=>v>0)?posData:[55,38,7],backgroundColor:['#60a5fa','#38bdf8','#6b7280'],borderColor:'rgba(5,13,31,0.8)',borderWidth:3,hoverOffset:6}]},options:{responsive:true,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed}%`}}}}});
+            // Possession Chart
+            const possCtx = document.getElementById('possessionChart').getContext('2d');
+            new Chart(possCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Team A', 'Team B', 'Contested'],
+                    datasets: [{
+                        data: posData,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)', // blue-500
+                            'rgba(239, 68, 68, 0.8)',  // red-500
+                            'rgba(245, 158, 11, 0.8)'  // amber-500
+                        ],
+                        borderColor: 'rgba(15, 23, 42, 1)', // slate-900 border to match bg
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 20, color: '#e2e8f0' } }
+                    }
+                }
+            });
 
-    new Chart(document.getElementById('distanceChart').getContext('2d'),{type:'bar',data:{labels:distLabels.length?distLabels:['Player 1','Player 2','Player 3','Player 4','Player 5'],datasets:[{label:'Distance (m)',data:distData.length?distData:[950,870,820,780,740],backgroundColor:['rgba(34,197,94,0.55)','rgba(34,197,94,0.45)','rgba(34,197,94,0.35)','rgba(34,197,94,0.28)','rgba(34,197,94,0.2)'],borderColor:'rgba(34,197,94,0.8)',borderWidth:1,borderRadius:8}]},options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'rgba(59,130,246,0.06)'},ticks:{color:'#7b93c4'}},y:{grid:{color:'rgba(59,130,246,0.04)'},ticks:{color:'#7b93c4'}}}}});
-});
+            // Distance Chart
+            const distCtx = document.getElementById('distanceChart').getContext('2d');
+            new Chart(distCtx, {
+                type: 'bar',
+                data: {
+                    labels: distLabels.length > 0 ? distLabels : ['No Data'],
+                    datasets: [{
+                        label: 'Distance (meters prox.)',
+                        data: distData.length > 0 ? distData : [0],
+                        backgroundColor: 'rgba(16, 185, 129, 0.6)', // emerald-500
+                        borderColor: 'rgba(52, 211, 153, 1)',       // emerald-400
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        hoverBackgroundColor: 'rgba(16, 185, 129, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // Render as horizontal bar
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("Error initializing charts:", error);
+        }
+    });
 </script>
+
+<style>
+    /* Strict Mobile Viewport Constraints for Results Page */
+    @media (max-width: 768px) {
+        /* Force single column for all complex grid rows to prevent horizontal stretch */
+        .grid {
+            grid-template-columns: 1fr !important;
+            grid-auto-flow: row !important;
+        }
+        /* Mobile Touch Target Standards (Apple/Android guidelines) */
+        a, button {
+            min-height: 44px;
+        }
+        /* Prevent canvas blowout */
+        canvas {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+    }
+
+    /* Enforce rigid 16:9 container aspect ratios for mobile without height stretching */
+    .aspect-video {
+        width: 100% !important;
+        max-width: 100% !important;
+        aspect-ratio: 16 / 9 !important;
+        height: auto !important;
+    }
+</style>
 {% endblock %}

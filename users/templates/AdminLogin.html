@@ -1,73 +1,36 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block contents %}
-<style>
-.admin-page { min-height:calc(100vh - 68px);display:flex;align-items:center;justify-content:center;padding:2.5rem 1rem;position:relative;overflow:hidden; }
-.admin-page::before { content:'';position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1624880357913-a8539238245b?w=1400&q=70&auto=format&fit=crop');background-size:cover;background-position:center 50%;opacity:0.12;pointer-events:none; }
-.admin-page::after { content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(244,63,94,0.08) 0%,transparent 70%);pointer-events:none; }
-
-.admin-card { position:relative;z-index:1;background:var(--glass-bg2);border:1px solid rgba(244,63,94,0.25);border-radius:24px;width:100%;max-width:430px;backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.65),0 0 0 1px rgba(244,63,94,0.12);animation:riseUp 0.6s cubic-bezier(.22,.68,0,1.2) forwards; }
-@keyframes riseUp{from{opacity:0;transform:translateY(35px);}to{opacity:1;transform:translateY(0);}}
-
-.admin-header { background:linear-gradient(135deg,rgba(244,63,94,0.11),rgba(159,18,57,0.06));border-bottom:1px solid rgba(244,63,94,0.18);padding:2rem 2rem 1.75rem;text-align:center; }
-.admin-emblem { width:68px;height:68px;border-radius:20px;background:linear-gradient(140deg,#f43f5e,#9f1239);display:flex;align-items:center;justify-content:center;font-size:1.85rem;color:#fff;margin:0 auto 1rem;box-shadow:0 0 30px rgba(244,63,94,0.38);animation:shieldPulse 3s ease-in-out infinite; }
-@keyframes shieldPulse{0%,100%{box-shadow:0 0 25px rgba(244,63,94,0.35);}50%{box-shadow:0 0 45px rgba(244,63,94,0.55);}}
-.admin-title { font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;letter-spacing:0.5px;color:#fff;line-height:1; }
-.admin-sub { font-size:0.82rem;color:var(--text-soft);margin-top:0.3rem; }
-.admin-body { padding:1.75rem 2rem 2rem; }
-
-.admin-warning { display:flex;gap:10px;align-items:flex-start;background:rgba(244,63,94,0.07);border:1px solid rgba(244,63,94,0.18);border-radius:12px;padding:0.9rem 1rem;margin-bottom:1.5rem; }
-.admin-warning-icon { color:var(--danger);font-size:1rem;flex-shrink:0;margin-top:1px; }
-.admin-warning-text { font-size:0.78rem;color:var(--text-soft);line-height:1.5; }
-.admin-warning-text strong { color:var(--danger); }
-
-.sec-row { display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:10px;padding:0.65rem 0.9rem;margin-bottom:1.5rem; }
-.sec-dot { width:7px;height:7px;border-radius:50%;background:var(--danger);animation:blink2 2s infinite; }
-@keyframes blink2{0%,100%{opacity:1;}50%{opacity:0.3;}}
-.sec-text { font-size:0.73rem;color:var(--text-muted);font-weight:500; }
-.sec-text strong { color:var(--text-soft); }
-
-/* Override fp-icon/input for danger theme */
-.admin-body .fp-field:focus-within .fp-icon { color:var(--danger)!important; }
-.admin-body .fp-input:focus { background:rgba(244,63,94,0.05)!important;border-color:var(--danger)!important;box-shadow:0 0 0 3px rgba(244,63,94,0.14)!important; }
-.admin-body .fp-eye:hover { color:var(--danger)!important; }
-</style>
-
-<div class="admin-page">
-    <div class="admin-card">
-        <div class="admin-header">
-            <div class="admin-emblem"><i class="bi bi-shield-lock-fill"></i></div>
-            <div class="admin-title">Admin Access</div>
-            <p class="admin-sub">Restricted to authorised personnel only</p>
-        </div>
-        <div class="admin-body">
-            <div class="sec-row">
-                <div class="sec-dot"></div>
-                <div class="sec-text"><strong>Secure connection active</strong> — This session is monitored</div>
+<div class="flex items-center justify-center min-h-[70vh] w-full px-4">
+    <div class="glass-panel rounded-2xl p-8 sm:p-10 shadow-2xl w-full max-w-md transform hover:scale-[1.02] transition-transform duration-300">
+        <div class="text-center mb-8">
+            <div class="inline-flex justify-center items-center bg-red-500/10 text-red-500 rounded-full mb-4 p-4 shadow-sm border border-red-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-shield-lock-fill" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 0c-.69 0-1.843.265-2.928.56-1.11.3-2.229.655-2.887.87a1.54 1.54 0 0 0-1.044 1.262c-.596 4.477.787 7.795 2.465 9.99a11.777 11.777 0 0 0 2.517 2.453c.386.273.744.482 1.048.625.28.132.581.24.829.24s.548-.108.829-.24a7.159 7.159 0 0 0 1.048-.625 11.775 11.775 0 0 0 2.517-2.453c1.678-2.195 3.061-5.513 2.465-9.99a1.541 1.541 0 0 0-1.044-1.263 62.467 62.467 0 0 0-2.887-.87C9.843.266 8.69 0 8 0zm0 5a1.5 1.5 0 0 1 .5 2.915l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99A1.5 1.5 0 0 1 8 5z"/>
+                </svg>
             </div>
-            <div class="admin-warning">
-                <i class="bi bi-exclamation-triangle-fill admin-warning-icon"></i>
-                <div class="admin-warning-text"><strong>Restricted Area.</strong> Unauthorised login attempts are logged and reported. Access is granted to administrators only.</div>
-            </div>
-            <form action="{% url 'AdminLoginCheck' %}" method="POST" autocomplete="off">
-                {% csrf_token %}
-                <div class="fp-field">
-                    <label class="fp-label" for="adminid">Administrator ID</label>
-                    <i class="bi bi-person-badge fp-icon"></i>
-                    <input type="text" id="adminid" name="loginid" class="fp-input" required placeholder="Enter admin ID" autocomplete="username">
-                </div>
-                <div class="fp-field" style="position:relative;">
-                    <label class="fp-label" for="adminpwd">Password</label>
-                    <i class="bi bi-lock fp-icon"></i>
-                    <input type="password" id="adminpwd" name="pswd" class="fp-input" required placeholder="••••••••" autocomplete="current-password" style="padding-right:2.8rem!important;">
-                    <button type="button" class="fp-eye" onclick="togglePwd('adminpwd',this)"><i class="bi bi-eye"></i></button>
-                </div>
-                {% if messages %}{% for message in messages %}<div class="fp-alert-danger"><i class="bi bi-shield-exclamation me-1"></i>{{ message }}</div>{% endfor %}{% endif %}
-                <div style="margin-top:1.6rem;"><button type="submit" class="btn-fp-danger"><i class="bi bi-shield-check"></i> Verify & Enter</button></div>
-            </form>
-            <div style="text-align:center;font-size:0.82rem;color:var(--text-soft);margin-top:1.25rem;">Not an admin? <a href="{% url 'UserLogin' %}" class="auth-link">Go to User Login</a></div>
+            <h2 class="text-3xl font-extrabold mb-2 text-white tracking-tight">Admin Access</h2>
+            <p class="text-red-400 text-sm font-medium">Restricted personnel only</p>
         </div>
+
+        <form action="{% url 'AdminLoginCheck' %}" method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Administrator ID</label>
+                <input type="text" class="form-input" name="loginid" required placeholder="Enter ID">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Password</label>
+                <input type="password" class="form-input" name="pswd" required placeholder="••••••••">
+            </div>
+            
+            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-all duration-300 mt-2">
+                Verify Identity
+            </button>
+        </form>
     </div>
 </div>
-<script>function togglePwd(id,btn){const f=document.getElementById(id),i=btn.querySelector('i');f.type=f.type==='password'?'text':'password';i.className=f.type==='password'?'bi bi-eye':'bi bi-eye-slash';}</script>
 {% endblock %}

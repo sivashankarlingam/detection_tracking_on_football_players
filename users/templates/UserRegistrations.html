@@ -1,153 +1,117 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block contents %}
-<style>
-.reg-page { min-height:calc(100vh - 68px);display:flex;align-items:flex-start;justify-content:center;padding:3rem 1rem 4rem;position:relative;overflow:hidden; }
-.reg-page::before { content:'';position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1624880357913-a8539238245b?w=1400&q=70&auto=format&fit=crop');background-size:cover;background-position:center 20%;opacity:0.12;pointer-events:none; }
-.reg-page::after { content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(59,130,246,0.08) 0%,transparent 70%);pointer-events:none; }
-
-.reg-card { position:relative;z-index:1;background:var(--glass-bg2);border:1px solid var(--border-blue);border-radius:24px;width:100%;max-width:660px;backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(59,130,246,0.12);animation:riseUp 0.6s cubic-bezier(.22,.68,0,1.2) forwards; }
-@keyframes riseUp{from{opacity:0;transform:translateY(35px);}to{opacity:1;transform:translateY(0);}}
-
-.reg-header { background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(29,78,216,0.05));border-bottom:1px solid var(--border-blue);padding:1.75rem 2rem;text-align:center; }
-.reg-title { font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;letter-spacing:0.5px;color:#fff; }
-.reg-sub { font-size:0.82rem;color:var(--text-soft);margin-top:0.25rem; }
-.reg-body { padding:1.75rem 2rem 2.25rem; }
-
-.avatar-zone { text-align:center;margin-bottom:1.75rem; }
-.avatar-ring { position:relative;width:90px;height:90px;display:inline-block;cursor:pointer; }
-.avatar-ring img { width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid var(--border-blue);background:rgba(255,255,255,0.04);display:block;transition:border-color 0.22s,transform 0.22s; }
-.avatar-ring:hover img { border-color:var(--blue-lt);transform:scale(1.03); }
-.avatar-cam { position:absolute;bottom:2px;right:2px;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--blue-lt),var(--blue-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.65rem;border:2px solid var(--navy-2);box-shadow:0 2px 8px var(--blue-glow); }
-.avatar-hint { font-size:0.7rem;color:var(--text-muted);margin-top:0.5rem; }
-
-.form-sep { display:flex;align-items:center;gap:8px;font-size:0.66rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan);margin:1.4rem 0 1rem; }
-.form-sep::after { content:'';flex:1;height:1px;background:rgba(56,189,248,0.15); }
-.invalid-feedback { font-size:0.73rem!important;color:var(--danger)!important; }
-@media(max-width:575px){ .reg-body{padding:1.25rem 1.1rem 1.75rem;} }
-</style>
-
-<div class="reg-page">
-    <div class="reg-card">
-        <div class="reg-header">
-            <div class="auth-emblem" style="width:52px;height:52px;border-radius:14px;background:var(--navy-2);padding:8px;overflow:hidden;margin:0 auto 1rem;box-shadow:0 0 20px var(--blue-glow);"><img src="{% static 'img/football_logo.png' %}" alt="Logo" style="width:100%;height:100%;object-fit:contain;"></div>
-            <div class="reg-title">Create Your Account</div>
-            <p class="reg-sub" style="color:var(--cyan);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;font-size:0.75rem;">Join the next-gen analytics platform</p>
+<div class="flex items-center justify-center min-h-[70vh] w-full px-4 mb-10">
+    <div class="glass-panel rounded-2xl p-8 sm:p-10 shadow-2xl w-full max-w-2xl transform hover:scale-[1.01] transition-transform duration-300">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-extrabold mb-3 text-white tracking-tight">Create Account</h2>
+            <p class="text-gray-400 text-sm font-medium">Join the next-gen football analytics platform</p>
         </div>
-        <div class="reg-body">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="{% if message.tags == 'success' %}fp-alert-success{% else %}fp-alert-danger{% endif %}">
-                        <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %}"></i>
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
 
-            <div class="avatar-zone">
-                <label for="profile_image" class="avatar-ring">
-                    <img id="profilePreview" src="https://ui-avatars.com/api/?name=New+User&background=0a1628&color=60a5fa&bold=true&rounded=true" alt="Preview">
-                    <div class="avatar-cam"><i class="bi bi-camera-fill"></i></div>
-                </label>
-                <input type="file" id="profile_image" name="profile_image" class="d-none" accept="image/*" onchange="previewImg(event)">
-                <p class="avatar-hint">Click to upload profile photo</p>
+        <!-- Registration Status Messages -->
+        {% if messages %}
+            <div class="mb-6 space-y-3">
+            {% for message in messages %}
+                <div class="{% if message.tags == 'success' %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-red-500/10 border-red-500/20 text-red-400{% endif %} border text-sm font-medium rounded-lg py-3 px-4 shadow-sm flex items-center justify-center gap-2">
+                    {% if message.tags == 'success' %}
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        <span>Success! {{ message }}</span>
+                    {% else %}
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                        <span>Notice: {{ message }}</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+
+        <form action="{% url 'UserRegisterForm' %}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Profile Image Upload with Preview -->
+            <div class="text-center mb-8 relative flex flex-col items-center">
+                <div class="relative inline-block">
+                    <img id="profilePreview" src="{% static 'default_profile.png' %}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%20viewBox%3D%220%200%20120%20120%22%3E%3Crect%20fill%3D%22%23e9ecef%22%20width%3D%22120%22%20height%3D%22120%22%2F%3E%3Cpath%20fill%3D%22%23adb5bd%22%20d%3D%22M60%2020a16%2016%200%201%201%200%2032%2016%2016%200%200%201%200-32zm0%2042c18.8%200%2034%2015.2%2034%2034H26c0-18.8%2015.2-34%2034-34z%22%2F%3E%3C%2Fsvg%3E'" class="rounded-full object-cover shadow-lg border-4 border-emerald-400/50 w-32 h-32 bg-slate-800">
+                    <label for="profile_image" class="absolute bottom-0 right-0 bg-emerald-500 hover:bg-emerald-400 text-slate-900 rounded-full p-2.5 shadow-lg cursor-pointer transition-colors duration-300 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera-fill" viewBox="0 0 16 16"><path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2zm.5 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z"/></svg>
+                    </label>
+                    <input type="file" id="profile_image" name="profile_image" class="hidden" accept="image/*" onchange="previewImage(event)">
+                </div>
+                <div class="text-xs text-gray-400 mt-3 font-medium tracking-wide uppercase">Upload Profile Photo</div>
             </div>
 
-            <form action="{% url 'UserRegisterForm' %}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-                {% csrf_token %}
-
-                <div class="form-sep"><i class="bi bi-person"></i> Personal Info</div>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="fp-field">
-                            <label class="fp-label" for="name">Full Name</label>
-                            <i class="bi bi-person fp-icon"></i>
-                            <input type="text" id="name" name="name" class="fp-input" maxlength="100" required placeholder="John Doe">
-                            <div class="invalid-feedback">Please enter your name.</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="fp-field">
-                            <label class="fp-label" for="loginid">Login ID</label>
-                            <i class="bi bi-at fp-icon"></i>
-                            <input type="text" id="loginid" name="loginid" class="fp-input" maxlength="100" required placeholder="Unique username">
-                            <div class="invalid-feedback">Please choose a login ID.</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="fp-field">
-                            <label class="fp-label" for="email">Email Address</label>
-                            <i class="bi bi-envelope fp-icon"></i>
-                            <input type="email" id="email" name="email" class="fp-input" maxlength="100" required placeholder="john@example.com">
-                            <div class="invalid-feedback">Please enter a valid email.</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="fp-field" style="position:relative;">
-                            <label class="fp-label" for="password">Password</label>
-                            <i class="bi bi-lock fp-icon"></i>
-                            <input type="password" id="password" name="password" class="fp-input" minlength="6" maxlength="100" required placeholder="Min. 6 characters" style="padding-right:2.8rem!important;">
-                            <button type="button" class="fp-eye" onclick="togglePwd('password',this)"><i class="bi bi-eye"></i></button>
-                            <div class="invalid-feedback">Password must be at least 6 characters.</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="fp-field">
-                            <label class="fp-label" for="mobile">Mobile Number</label>
-                            <i class="bi bi-phone fp-icon"></i>
-                            <input type="tel" id="mobile" name="mobile" class="fp-input" pattern="[0-9]{10}" maxlength="10" required placeholder="10-digit number">
-                            <div class="invalid-feedback">Please enter a valid 10-digit number.</div>
-                        </div>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Full Name</label>
+                    <input type="text" class="form-input" name="name" maxlength="100" required placeholder="John Doe">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Login ID</label>
+                    <input type="text" class="form-input" name="loginid" maxlength="100" required placeholder="Unique username">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Password</label>
+                    <input type="password" class="form-input" name="password" minlength="6" maxlength="100" required placeholder="••••••••">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Email</label>
+                    <input type="email" class="form-input" name="email" maxlength="100" required placeholder="john@example.com">
                 </div>
 
-                <div class="form-sep"><i class="bi bi-geo-alt"></i> Address</div>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="fp-field">
-                            <label class="fp-label" for="locality">Locality</label>
-                            <i class="bi bi-map fp-icon"></i>
-                            <input type="text" id="locality" name="locality" class="fp-input" maxlength="100" required placeholder="Neighbourhood">
-                            <div class="invalid-feedback">Locality is required.</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="fp-field">
-                            <label class="fp-label" for="city">City</label>
-                            <i class="bi bi-building fp-icon"></i>
-                            <input type="text" id="city" name="city" class="fp-input" maxlength="100" required placeholder="Your city">
-                            <div class="invalid-feedback">City is required.</div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="fp-field">
-                            <label class="fp-label" for="address">Full Address</label>
-                            <i class="bi bi-house fp-icon" style="bottom: auto; top: 1.8rem; font-size: 1.15rem;"></i>
-                            <textarea id="address" name="address" class="fp-input" maxlength="1000" rows="2" required placeholder="Street address, building, landmark…" style="padding-top: 1rem !important;"></textarea>
-                            <div class="invalid-feedback">Please provide your address.</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="fp-field">
-                            <label class="fp-label" for="state">State</label>
-                            <i class="bi bi-pin-map fp-icon"></i>
-                            <input type="text" id="state" name="state" class="fp-input" maxlength="100" required placeholder="Your state">
-                            <div class="invalid-feedback">State is required.</div>
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Mobile Number</label>
+                    <input type="tel" pattern="[0-9]{10}" class="form-input" name="mobile" maxlength="10" required placeholder="10 digit number">
                 </div>
 
-                <div style="margin-top:1.75rem;"><button type="submit" class="btn-fp-blue"><i class="bi bi-person-check-fill"></i> Create Account</button></div>
-            </form>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Locality</label>
+                    <input type="text" class="form-input" name="locality" maxlength="100" required placeholder="Neighborhood">
+                </div>
 
-            <div style="text-align:center;font-size:0.82rem;color:var(--text-soft);margin-top:1.25rem;">Already have an account? <a href="{% url 'UserLogin' %}" class="auth-link">Sign in here</a></div>
-        </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Full Address</label>
+                    <textarea class="form-input" name="address" maxlength="1000" rows="2" required placeholder="Street address"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">City</label>
+                    <input type="text" class="form-input" name="city" maxlength="100" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">State</label>
+                    <input type="text" class="form-input" name="state" maxlength="100" required>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all duration-300 mt-6">
+                Create Account
+            </button>
+            
+            <div class="text-center pt-6 mt-6 border-t border-white/10">
+                <p class="text-sm text-gray-400 font-medium">
+                    Already have an account? 
+                    <a href="{% url 'UserLogin' %}" class="text-emerald-400 hover:text-emerald-300 font-bold transition-colors ml-1">Sign in here</a>
+                </p>
+            </div>
+        </form>
     </div>
 </div>
 
 <script>
-function previewImg(e){const r=new FileReader();r.onload=()=>{document.getElementById('profilePreview').src=r.result;};if(e.target.files[0])r.readAsDataURL(e.target.files[0]);}
-function togglePwd(id,btn){const f=document.getElementById(id),i=btn.querySelector('i');f.type=f.type==='password'?'text':'password';i.className=f.type==='password'?'bi bi-eye':'bi bi-eye-slash';}
-(()=>{'use strict';document.querySelectorAll('.needs-validation').forEach(form=>{form.addEventListener('submit',e=>{if(!form.checkValidity()){e.preventDefault();e.stopPropagation();}form.classList.add('was-validated');},false);});})();
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            const output = document.getElementById('profilePreview');
+            output.src = reader.result;
+        };
+        if(event.target.files[0]) {
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    }
 </script>
 {% endblock %}

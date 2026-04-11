@@ -3,300 +3,176 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FP Track — Football Player Detection & Tracking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VisionPitch - AI Football Analytics</title>
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="manifest" href="{% static 'manifest.json' %}">
-    <meta name="theme-color" content="#050d1f">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0f172a', /* slate-900 */
+                        accent: '#10b981', /* emerald-500 */
+                        accentLight: '#34d399', /* emerald-400 */
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --blue:       #3b82f6;
-            --blue-lt:    #60a5fa;
-            --blue-dk:    #1d4ed8;
-            --blue-dim:   rgba(59,130,246,0.12);
-            --blue-glow:  rgba(59,130,246,0.35);
-            --cyan:       #38bdf8;
-            --cyan-dim:   rgba(56,189,248,0.12);
-            --green:      #22c55e;
-            --green-dim:  rgba(34,197,94,0.12);
-            --navy:       #050d1f;
-            --navy-2:     #0a1628;
-            --navy-3:     #0f1f3d;
-            --glass-bg:   rgba(10,22,40,0.72);
-            --glass-bg2:  rgba(15,31,61,0.80);
-            --border:     rgba(255,255,255,0.08);
-            --border-blue:rgba(59,130,246,0.22);
-            --text:       #e8f0fe;
-            --text-soft:  #7b93c4;
-            --text-muted: #3d5280;
-            --danger:     #f43f5e;
-            --nav-h:      68px;
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 1rem;
         }
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: 'DM Sans', sans-serif;
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-            background: var(--navy);
+        
+        /* Floating Navbar specific override to ensure it's a pill */
+        .glass-nav {
+            border-radius: 9999px; /* full rounded */
         }
 
-        /* ── BACKGROUND ── */
-        #site-bg {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        .nav-link {
+            color: #ffffff;
+            font-weight: 500;
+            position: relative;
+            transition: color 0.3s ease;
+            padding-bottom: 4px;
         }
-        #site-bg .bg-photo {
-            position: absolute; inset: 0;
-            background-image: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1920&q=75&auto=format&fit=crop');
-            background-size: cover; background-position: center 25%;
-            opacity: 0.25;
+        
+        .nav-link:hover {
+            color: #34d399; /* emerald-400 */
         }
-        #site-bg .bg-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(160deg, rgba(5,13,31,0.5) 0%, rgba(5,13,31,0.2) 50%, rgba(5,13,31,0.6) 100%);
-        }
-        #site-bg .bg-mesh {
-            position: absolute; inset: 0;
-            background:
-                radial-gradient(ellipse 80% 50% at 20% 20%, rgba(59,130,246,0.07) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(56,189,248,0.05) 0%, transparent 60%);
-        }
-        #site-bg .bg-grid {
-            position: absolute; inset: 0;
-            background-image:
-                linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
-            background-size: 64px 64px;
-        }
-
-        /* ── NAVBAR ── */
-        .topnav {
-            position: fixed; top: 0; left: 0; right: 0;
-            height: var(--nav-h); z-index: 1000;
-            display: flex; align-items: center;
-            padding: 0 2rem;
-            background: rgba(5,13,31,0.82);
-            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border-bottom: 1px solid var(--border);
-        }
-        .topnav::after {
+        
+        .nav-link::after {
             content: '';
-            position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--blue-lt) 40%, var(--cyan) 60%, transparent);
-            opacity: 0.5;
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: #34d399;
+            bottom: 0px;
+            left: 0;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            transform-origin: center;
+        }
+        
+        .nav-link:hover::after {
+            transform: scaleX(1);
         }
 
-        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
-        .brand-badge {
-            width: 44px; height: 44px; border-radius: 12px;
-            background: linear-gradient(140deg, var(--blue-lt), var(--blue-dk));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.35rem; color: #fff; box-shadow: 0 0 20px var(--blue-glow); flex-shrink: 0;
-            border: 1px solid rgba(255,255,255,0.15);
+        .logo-glow {
+            transition: all 0.3s ease;
         }
-        .brand-text-wrap { display: flex; flex-direction: column; justify-content: center; }
-        .brand-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; letter-spacing: 0.4px; color: #fff; text-transform: uppercase; line-height: 1.05; white-space: nowrap; }
-        .brand-name em { color: var(--blue-lt); font-style: normal; display: block; filter: drop-shadow(0 0 10px rgba(59,130,246,0.25)); }
-        .brand-sub { display: block; font-size: 0.7rem; font-weight: 800; letter-spacing: 2.2px; text-transform: uppercase; color: var(--cyan); margin-top: 5px; opacity:0.9; }
-
-        .nav-links { display: flex; align-items: center; gap: 1rem; list-style: none; margin: 0 auto; padding: 0; }
-        .nav-links a {
-            display: flex; align-items: center; gap: 8px; padding: 0.5rem 1.1rem; border-radius: 12px;
-            font-size: 0.88rem; font-weight: 500;
-            color: var(--text-soft); text-decoration: none; transition: all 0.2s;
-        }
-        .nav-links a i { font-size: 0.9rem; }
-        .nav-links a:hover { color: var(--text); background: rgba(59,130,246,0.12); transform:scale(1.05); }
-        .nav-links a.active { color: var(--blue-lt); background: var(--blue-dim); font-weight: 700; border:1px solid var(--border-blue); }
-
-        .nav-ctas { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
-        .btn-ghost-nav {
-            padding: 0.52rem 1.2rem; border-radius: 12px;
-            border: 1px solid var(--border-blue); background: rgba(255,255,255,0.03);
-            color: var(--text); font-family: 'DM Sans', sans-serif;
-            font-size: 0.85rem; font-weight: 600; cursor: pointer;
-            text-decoration: none; transition: all 0.25s;
-            display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-ghost-nav:hover { border-color: var(--blue-lt); background: var(--blue-dim); transform: translateY(-1px); box-shadow: 0 4px 15px rgba(0,0,0,0.25); }
-        .btn-blue-nav {
-            padding: 0.52rem 1.35rem; border-radius: 12px; border: none;
-            background: linear-gradient(135deg, var(--blue-lt), var(--blue-dk));
-            color: #fff; font-family: 'DM Sans', sans-serif;
-            font-size: 0.85rem; font-weight: 800; cursor: pointer;
-            text-decoration: none; transition: all 0.25s;
-            display: inline-flex; align-items: center; gap: 8px;
-            box-shadow: 0 4px 20px var(--blue-glow);
-            position: relative; overflow: hidden;
-        }
-        .btn-blue-nav::after {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transform: translateX(-100%); transition: transform 0.6s ease;
-        }
-        .btn-blue-nav:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--blue-glow); color: #fff; }
-        .btn-blue-nav:hover::after { transform: translateX(100%); }
-
-        .hamburger {
-            display: none; background: none;
-            border: 1px solid var(--border); border-radius: 9px;
-            padding: 0.38rem 0.62rem; color: var(--text); font-size: 1.2rem;
-            cursor: pointer; margin-left: auto; transition: all 0.2s;
-        }
-        .hamburger:hover { border-color: var(--blue-lt); color: var(--blue-lt); }
-
-        .nav-drawer {
-            display: none; position: fixed;
-            top: var(--nav-h); left: 0; right: 0;
-            background: rgba(5,13,31,0.97); backdrop-filter: blur(24px);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 1.25rem 1.5rem; z-index: 999;
-            flex-direction: column; gap: 0.2rem;
-        }
-        .nav-drawer.open { display: flex; }
-        .nav-drawer a {
-            display: flex; align-items: center; gap: 9px;
-            padding: 0.7rem 1rem; border-radius: 10px;
-            font-size: 0.9rem; font-weight: 500;
-            color: var(--text-soft); text-decoration: none; transition: all 0.2s;
-        }
-        .nav-drawer a:hover, .nav-drawer a.active { background: var(--blue-dim); color: var(--blue-lt); font-weight: 700; }
-        .drawer-sep { height: 1px; background: var(--border); margin: 0.5rem 0; }
-        .drawer-ctas { display: flex; gap: 0.75rem; padding-top: 0.25rem; }
-        .drawer-ctas a { flex: 1; justify-content: center; border-radius: 12px; padding: 0.65rem; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 6px; }
-        .drawer-ctas .dc-ghost { border: 1px solid var(--border); color: var(--text-soft); background: transparent; }
-        .drawer-ctas .dc-ghost:hover { border-color: var(--blue-lt); color: var(--blue-lt); }
-        .drawer-ctas .dc-blue { background: linear-gradient(135deg, var(--blue-lt), var(--blue-dk)); color: #fff; }
-
-        /* ── PAGE WRAP ── */
-        .page-wrap { position: relative; z-index: 1; padding-top: var(--nav-h); min-height: 100vh; }
-
-        /* ── SHARED COMPONENTS ── */
-        .fp-tag { display:inline-flex;align-items:center;gap:5px;padding:0.27rem 0.78rem;border-radius:50px;font-size:0.67rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase; }
-        .fp-tag-blue  { background:var(--blue-dim);   color:var(--blue-lt);  border:1px solid var(--border-blue); }
-        .fp-tag-cyan  { background:var(--cyan-dim);   color:var(--cyan);     border:1px solid rgba(56,189,248,0.25); }
-        .fp-tag-green { background:var(--green-dim);  color:var(--green);    border:1px solid rgba(34,197,94,0.25); }
-        .fp-tag-red   { background:rgba(244,63,94,0.1); color:var(--danger); border:1px solid rgba(244,63,94,0.22); }
-
-        .fp-alert-danger {
-            background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.25);
-            color: var(--danger); border-radius: 12px; padding: 0.75rem 1rem;
-            font-size: 0.83rem; text-align: center; margin-top: 0.75rem;
+        .logo-glow:hover {
+            text-shadow: 0 0 15px rgba(52, 211, 153, 0.8);
+            color: #34d399;
         }
 
-        .fp-input {
-            background: rgba(255,255,255,0.05) !important;
-            border: 1px solid var(--border) !important; border-radius: 12px !important;
-            color: var(--text) !important; font-family: 'DM Sans', sans-serif !important;
-            padding: 0.72rem 1rem 0.72rem 2.8rem !important;
-            font-size: 0.9rem !important; transition: all 0.22s !important; width: 100%;
+        .animate-fade-in-up {
+            animation: fadeInUp 1s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
         }
-        .fp-input::placeholder { color: var(--text-muted) !important; }
-        .fp-input:focus {
-            background: rgba(59,130,246,0.07) !important;
-            border-color: var(--blue-lt) !important;
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.15) !important;
-            outline: none !important; color: var(--text) !important;
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        textarea.fp-input { padding-top: 0.72rem !important; resize: vertical; }
 
-        .fp-label { display:block;font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan);margin-bottom:0.4rem;opacity:0.8; }
-        .fp-field { position:relative;margin-bottom:1.25rem;display:flex;flex-direction:column; }
-        .fp-icon { position:absolute;left:13px;bottom:1.15rem;color:rgba(255,255,255,0.4);font-size:1.05rem;pointer-events:none;transition:all 0.25s;z-index:2; }
-        .fp-field:focus-within .fp-icon { color:var(--blue-lt);filter:drop-shadow(0 0 5px var(--blue-glow)); }
-        .fp-eye { position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.88rem;padding:0;z-index:2;transition:color 0.2s; }
-        .fp-eye:hover { color:var(--blue-lt); }
-
-        .fp-alert-success { background:rgba(34,197,94,0.1); color:#4ade80; border:1px solid rgba(34,197,94,0.3); padding:0.8rem 1rem; border-radius:12px; font-size:0.85rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:10px; }
-        .fp-alert-danger { background:rgba(239,68,68,0.1); color:#f87171; border:1px solid rgba(239,68,68,0.3); padding:0.8rem 1rem; border-radius:12px; font-size:0.85rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:10px; }
-
-        .btn-fp-blue {
-            display:flex;align-items:center;justify-content:center;gap:10px;
-            width:100%;padding:0.95rem 1.75rem;border-radius:14px;border:none;
-            background:linear-gradient(135deg,var(--blue-lt),var(--blue-dk));
-            color:#fff;font-family:'DM Sans',sans-serif;font-weight:800;font-size:1.05rem;
-            cursor:pointer;transition:all 0.28s;box-shadow:0 8px 30px var(--blue-glow);
-            text-decoration:none;position:relative;overflow:hidden;
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: rgba(15, 23, 42, 0.5);
+            color: #ffffff;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            outline: none;
         }
-        .btn-fp-blue:hover { transform:translateY(-3px);box-shadow:0 15px 45px var(--blue-glow);color:#fff; }
-        .btn-fp-blue::after { content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent);transform:translateX(-100%);transition:transform 0.5s ease; }
-        .btn-fp-blue:hover::after { transform:translateX(100%); }
-
-        .btn-fp-danger {
-            display:flex;align-items:center;justify-content:center;gap:8px;
-            width:100%;padding:0.88rem 1.5rem;border-radius:13px;border:none;
-            background:linear-gradient(135deg,#f43f5e,#9f1239);
-            color:#fff;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.97rem;
-            cursor:pointer;transition:all 0.25s;box-shadow:0 4px 22px rgba(244,63,94,0.35);
-            text-decoration:none;
+        .form-input:focus {
+            border-color: #34d399;
+            box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.3);
         }
-        .btn-fp-danger:hover { transform:translateY(-2px);box-shadow:0 8px 32px rgba(244,63,94,0.5);color:#fff; }
 
-        .auth-link { color:var(--cyan);text-decoration:none;font-weight:600; }
-        .auth-link:hover { text-decoration:underline;color:var(--blue-lt); }
-
-        ::-webkit-scrollbar { width:5px; }
-        ::-webkit-scrollbar-track { background:var(--navy); }
-        ::-webkit-scrollbar-thumb { background:rgba(59,130,246,0.2);border-radius:3px; }
-
-        @media(max-width:991px) { .nav-links,.nav-ctas{display:none!important;} .hamburger{display:block;} .nav-brand{margin-right:0;} }
-        @media(max-width:575px) { .topnav{padding:0 1rem;} }
+        /* The Premium Background Strategy */
+        .premium-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: linear-gradient(to bottom right, rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.95)), url('/media/profiles/Stadium Photos - Download Free High-Quality Pictures _ Freepik.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
     </style>
+    {% block extra_css %}{% endblock %}
 </head>
-<body>
-<div id="site-bg">
-    <div class="bg-photo"></div>
-    <div class="bg-overlay"></div>
-    <div class="bg-mesh"></div>
-    <div class="bg-grid"></div>
-</div>
+<body class="text-white font-sans antialiased relative min-h-screen flex flex-col overflow-x-hidden">
+    <!-- Premium Background -->
+    <div class="premium-bg"></div>
 
-<nav class="topnav">
-    <a href="{% url 'index' %}" class="nav-brand">
-        <div class="brand-badge" style="background:var(--navy-2);padding:2px;overflow:hidden;"><img src="{% static 'img/football_logo.png' %}" alt="FP" style="width:100%;height:100%;object-fit:contain;"></div>
-        <div class="brand-text-wrap">
-            <div class="brand-name">FOOTBALL PLAYER <em>TRACK</em></div>
-            <span class="brand-sub">DETECTION & ANALYTICS</span>
+    <!-- Floating Pill Navbar -->
+    {% block navbar %}
+    <nav class="glass-panel glass-nav mt-4 mx-auto max-w-6xl sticky top-4 z-50 px-6 sm:px-8 py-3 w-[95%]">
+        <div class="flex items-center justify-between h-12">
+            <div class="flex-shrink-0">
+                <a href="{% url 'index' %}" class="logo-glow text-2xl font-extrabold tracking-tight flex items-center">
+                    <svg class="w-7 h-7 mr-2 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v2m0 12v2m8-8h-2M6 12H4m11 0a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    FP<span class="text-emerald-400 ml-1">Analysis</span>
+                </a>
+            </div>
+            <!-- Desktop Menu -->
+            <div class="hidden md:block">
+                <div class="ml-10 flex items-center space-x-8">
+                    <a href="{% url 'index' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'index' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">Home</a>
+                    <a href="{% url 'UserLogin' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'UserLogin' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">User Login</a>
+                    <a href="{% url 'UserRegisterForm' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'UserRegisterForm' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">Register</a>
+                    <a href="{% url 'AdminLogin' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'AdminLogin' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">Admin Sign In</a>
+                </div>
+            </div>
         </div>
-    </a>
-    <ul class="nav-links">
-        <li><a href="{% url 'index' %}"           class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}"><i class="bi bi-house-door"></i> Home</a></li>
-        <li><a href="{% url 'UserLogin' %}"        class="{% if request.resolver_match.url_name == 'UserLogin' %}active{% endif %}"><i class="bi bi-person"></i> Login</a></li>
-        <li><a href="{% url 'UserRegisterForm' %}" class="{% if request.resolver_match.url_name == 'UserRegisterForm' %}active{% endif %}"><i class="bi bi-person-plus"></i> Register</a></li>
-        <li><a href="{% url 'AdminLogin' %}"       class="{% if request.resolver_match.url_name == 'AdminLogin' %}active{% endif %}"><i class="bi bi-shield-lock"></i> Admin</a></li>
-    </ul>
-    <div class="nav-ctas">
-        <a href="{% url 'UserLogin' %}"        class="btn-ghost-nav"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
-        <a href="{% url 'UserRegisterForm' %}" class="btn-blue-nav">Get Started <i class="bi bi-arrow-right"></i></a>
-    </div>
-    <button class="hamburger" id="hamburger" aria-label="Menu"><i class="bi bi-list" id="hamIcon"></i></button>
-</nav>
+    </nav>
+    {% endblock %}
 
-<div class="nav-drawer" id="navDrawer">
-    <a href="{% url 'index' %}"           class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}"><i class="bi bi-house-door"></i> Home</a>
-    <a href="{% url 'UserLogin' %}"        class="{% if request.resolver_match.url_name == 'UserLogin' %}active{% endif %}"><i class="bi bi-person"></i> User Login</a>
-    <a href="{% url 'UserRegisterForm' %}" class="{% if request.resolver_match.url_name == 'UserRegisterForm' %}active{% endif %}"><i class="bi bi-person-plus"></i> Register</a>
-    <a href="{% url 'AdminLogin' %}"       class="{% if request.resolver_match.url_name == 'AdminLogin' %}active{% endif %}"><i class="bi bi-shield-lock"></i> Admin Login</a>
-    <div class="drawer-sep"></div>
-    <div class="drawer-ctas">
-        <a href="{% url 'UserLogin' %}"        class="dc-ghost"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
-        <a href="{% url 'UserRegisterForm' %}" class="dc-blue"><i class="bi bi-arrow-right"></i> Get Started</a>
-    </div>
-</div>
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+        {% block messages %}{% endblock %}
+        {% block contents %}
+        {% endblock %}
+    </main>
 
-<div class="page-wrap">{% block contents %}{% endblock %}</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const hamburger=document.getElementById('hamburger'),drawer=document.getElementById('navDrawer'),hamIcon=document.getElementById('hamIcon');
-    hamburger.addEventListener('click',()=>{const o=drawer.classList.toggle('open');hamIcon.className=o?'bi bi-x-lg':'bi bi-list';});
-    drawer.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{drawer.classList.remove('open');hamIcon.className='bi bi-list';}));
-    if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}
-</script>
+    <!-- Glassmorphic Footer -->
+    <footer class="glass-panel mx-auto max-w-6xl mb-6 mt-auto py-5 px-8 w-[95%]">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-sm text-gray-400">
+                &copy; 2026 Football player detection and tracking. All rights reserved.
+            </div>
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors">Privacy</a>
+                <a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors">Terms</a>
+            </div>
+        </div>
+    </footer>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>
