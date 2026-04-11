@@ -25,7 +25,6 @@ class VideoAnalysis(models.Model):
     output_video = models.FileField(upload_to='videos/output/', blank=True, null=True)
     status = models.CharField(max_length=50, default='Pending') # Pending, Processing, Completed, Failed
     progress = models.IntegerField(default=0)
-    metrics = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
