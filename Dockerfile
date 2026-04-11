@@ -14,7 +14,6 @@ RUN apt-get update && apt-get install -y \
     libsm6 \
     libxext6 \
     libgl1 \
-    libopenh264-7 \
     git \
  && rm -rf /var/lib/apt/lists/*
 
