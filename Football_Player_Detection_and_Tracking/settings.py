@@ -17,6 +17,9 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '*']
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+    'https://huggingface.co',
+    'https://*.hf.space',
+    'https://shankarlingam-football-analysis.hf.space',
 ]
 
 # FIX: Cookie settings needed for cross-origin iframe environments (HuggingFace Spaces)
@@ -48,7 +51,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # REMOVED: XFrameOptionsMiddleware blocks iframe embedding on Hugging Face
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'Football_Player_Detection_and_Tracking.urls'
