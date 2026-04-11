@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VisionPitch - AI Football Analytics</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0f172a', /* slate-900 */
+                        accent: '#10b981', /* emerald-500 */
+                        accentLight: '#34d399', /* emerald-400 */
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 1rem;
+        }
+        
+        /* Floating Navbar specific override to ensure it's a pill */
+        .glass-nav {
+            border-radius: 9999px; /* full rounded */
+        }
+
+        .nav-link {
+            color: #ffffff;
+            font-weight: 500;
+            position: relative;
+            transition: color 0.3s ease;
+            padding-bottom: 4px;
+        }
+        
+        .nav-link:hover {
+            color: #34d399; /* emerald-400 */
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: #34d399;
+            bottom: 0px;
+            left: 0;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            transform-origin: center;
+        }
+        
+        .nav-link:hover::after {
+            transform: scaleX(1);
+        }
+
+        .logo-glow {
+            transition: all 0.3s ease;
+        }
+        .logo-glow:hover {
+            text-shadow: 0 0 15px rgba(52, 211, 153, 0.8);
+            color: #34d399;
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 1s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: rgba(15, 23, 42, 0.5);
+            color: #ffffff;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        .form-input:focus {
+            border-color: #34d399;
+            box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.3);
+        }
+
+        /* The Premium Background Strategy */
+        .premium-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: linear-gradient(to bottom right, rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.95)), url('/media/profiles/Stadium Photos - Download Free High-Quality Pictures _ Freepik.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="text-white font-sans antialiased relative min-h-screen flex flex-col overflow-x-hidden">
+    <!-- Premium Background -->
+    <div class="premium-bg"></div>
+
+    <!-- Floating Pill Navbar -->
+    {% block navbar %}
+    <nav class="glass-panel glass-nav mt-4 mx-auto max-w-6xl sticky top-4 z-50 px-6 sm:px-8 py-3 w-[95%]">
+        <div class="flex items-center justify-between h-12">
+            <div class="flex-shrink-0">
+                <a href="{% url 'index' %}" class="logo-glow text-2xl font-extrabold tracking-tight flex items-center">
+                    <svg class="w-7 h-7 mr-2 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v2m0 12v2m8-8h-2M6 12H4m11 0a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    FP<span class="text-emerald-400 ml-1">Analysis</span>
+                </a>
+            </div>
+            <!-- Desktop Menu -->
+            <div class="hidden md:block">
+                <div class="ml-10 flex items-center space-x-8">
+                    <a href="{% url 'index' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'index' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">Home</a>
+                    <a href="{% url 'UserLogin' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'UserLogin' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">User Login</a>
+                    <a href="{% url 'UserRegisterForm' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'UserRegisterForm' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">Register</a>
+                    <a href="{% url 'AdminLogin' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'AdminLogin' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">Admin Sign In</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+        {% block messages %}{% endblock %}
+        {% block contents %}
+        {% endblock %}
+    </main>
+
+    <!-- Glassmorphic Footer -->
+    <footer class="glass-panel mx-auto max-w-6xl mb-6 mt-auto py-5 px-8 w-[95%]">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-sm text-gray-400">
+                &copy; 2026 Football player detection and tracking. All rights reserved.
+            </div>
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors">Privacy</a>
+                <a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors">Terms</a>
+            </div>
+        </div>
+    </footer>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

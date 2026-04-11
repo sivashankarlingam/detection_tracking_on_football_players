@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+db.sqlite3
+yolov8m.pt
+media/videos/
+openh264-1.8.0-win64.dll
+.vscode/
+venv/
+.env
+.DS_Store

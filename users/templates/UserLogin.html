@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contents %}
+<div class="flex items-center justify-center min-h-[70vh] w-full px-4">
+    <div class="glass-panel rounded-2xl p-8 sm:p-10 shadow-2xl w-full max-w-md transform hover:scale-[1.02] transition-transform duration-300">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-extrabold mb-3 text-white tracking-tight">Welcome Back</h2>
+            <p class="text-gray-400 text-sm font-medium">Enter your credentials to access your dashboard</p>
+        </div>
+
+        <form action="{% url 'UserLoginCheck' %}" method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Login ID</label>
+                <input type="text" name="loginid" required placeholder="Enter your ID" 
+                       class="form-input">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Password</label>
+                <input type="password" name="pswd" required placeholder="••••••••" 
+                       class="form-input">
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all duration-300 mt-2">
+                Sign In
+            </button>
+
+            {% if messages %}
+            <div class="mt-6 space-y-3">
+                {% for message in messages %}
+                <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium text-center rounded-lg py-3 px-4 shadow-sm">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="text-center pt-6 mt-6 border-t border-white/10">
+                <p class="text-sm text-gray-400 font-medium">
+                    Don't have an account? 
+                    <a href="{% url 'UserRegisterForm' %}" class="text-emerald-400 hover:text-emerald-300 font-bold transition-colors ml-1">Sign up</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

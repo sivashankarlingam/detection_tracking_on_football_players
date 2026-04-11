@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contents %}
+<div class="flex items-center justify-center min-h-[70vh] w-full px-4 mb-10">
+    <div class="glass-panel rounded-2xl p-8 sm:p-10 shadow-2xl w-full max-w-2xl transform hover:scale-[1.01] transition-transform duration-300">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-extrabold mb-3 text-white tracking-tight">Create Account</h2>
+            <p class="text-gray-400 text-sm font-medium">Join the next-gen football analytics platform</p>
+        </div>
+
+        <!-- Registration Status Messages -->
+        {% if messages %}
+            <div class="mb-6 space-y-3">
+            {% for message in messages %}
+                <div class="{% if message.tags == 'success' %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-red-500/10 border-red-500/20 text-red-400{% endif %} border text-sm font-medium rounded-lg py-3 px-4 shadow-sm flex items-center justify-center gap-2">
+                    {% if message.tags == 'success' %}
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        <span>Success! {{ message }}</span>
+                    {% else %}
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                        <span>Notice: {{ message }}</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+
+        <form action="{% url 'UserRegisterForm' %}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Profile Image Upload with Preview -->
+            <div class="text-center mb-8 relative flex flex-col items-center">
+                <div class="relative inline-block">
+                    <img id="profilePreview" src="{% static 'default_profile.png' %}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%20viewBox%3D%220%200%20120%20120%22%3E%3Crect%20fill%3D%22%23e9ecef%22%20width%3D%22120%22%20height%3D%22120%22%2F%3E%3Cpath%20fill%3D%22%23adb5bd%22%20d%3D%22M60%2020a16%2016%200%201%201%200%2032%2016%2016%200%200%201%200-32zm0%2042c18.8%200%2034%2015.2%2034%2034H26c0-18.8%2015.2-34%2034-34z%22%2F%3E%3C%2Fsvg%3E'" class="rounded-full object-cover shadow-lg border-4 border-emerald-400/50 w-32 h-32 bg-slate-800">
+                    <label for="profile_image" class="absolute bottom-0 right-0 bg-emerald-500 hover:bg-emerald-400 text-slate-900 rounded-full p-2.5 shadow-lg cursor-pointer transition-colors duration-300 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera-fill" viewBox="0 0 16 16"><path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2zm.5 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z"/></svg>
+                    </label>
+                    <input type="file" id="profile_image" name="profile_image" class="hidden" accept="image/*" onchange="previewImage(event)">
+                </div>
+                <div class="text-xs text-gray-400 mt-3 font-medium tracking-wide uppercase">Upload Profile Photo</div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Full Name</label>
+                    <input type="text" class="form-input" name="name" maxlength="100" required placeholder="John Doe">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Login ID</label>
+                    <input type="text" class="form-input" name="loginid" maxlength="100" required placeholder="Unique username">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Password</label>
+                    <input type="password" class="form-input" name="password" minlength="6" maxlength="100" required placeholder="••••••••">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Email</label>
+                    <input type="email" class="form-input" name="email" maxlength="100" required placeholder="john@example.com">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Mobile Number</label>
+                    <input type="tel" pattern="[0-9]{10}" class="form-input" name="mobile" maxlength="10" required placeholder="10 digit number">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Locality</label>
+                    <input type="text" class="form-input" name="locality" maxlength="100" required placeholder="Neighborhood">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">Full Address</label>
+                    <textarea class="form-input" name="address" maxlength="1000" rows="2" required placeholder="Street address"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">City</label>
+                    <input type="text" class="form-input" name="city" maxlength="100" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2 tracking-wide">State</label>
+                    <input type="text" class="form-input" name="state" maxlength="100" required>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all duration-300 mt-6">
+                Create Account
+            </button>
+            
+            <div class="text-center pt-6 mt-6 border-t border-white/10">
+                <p class="text-sm text-gray-400 font-medium">
+                    Already have an account? 
+                    <a href="{% url 'UserLogin' %}" class="text-emerald-400 hover:text-emerald-300 font-bold transition-colors ml-1">Sign in here</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            const output = document.getElementById('profilePreview');
+            output.src = reader.result;
+        };
+        if(event.target.files[0]) {
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    }
+</script>
+{% endblock %}

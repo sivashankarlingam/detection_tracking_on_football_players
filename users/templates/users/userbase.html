@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* Override background strictly for logged-in user dashboard */
+    .premium-bg {
+        background-image: linear-gradient(to bottom right, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.95)), url('/media/profiles/Soccer%20Player%20With%20Ball%20in%20Action.jpg') !important;
+    }
+</style>
+{% endblock %}
+
+{% block navbar %}
+<!-- Floating Pill Navbar for Logged-In Users -->
+<nav class="glass-panel glass-nav mt-4 mx-auto max-w-7xl sticky top-4 z-50 px-6 sm:px-8 py-3 w-[95%]">
+    <div class="flex items-center justify-between h-14">
+        <!-- Logo Left -->
+        <div class="flex-shrink-0">
+            <a href="{% url 'UserHome' %}" class="logo-glow text-2xl font-extrabold tracking-tight flex items-center">
+                <svg class="w-7 h-7 mr-2 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                FP<span class="text-emerald-400 ml-1">Analysis</span>
+            </a>
+        </div>
+
+        <!-- Everything Else Right -->
+        <div class="flex items-center space-x-6">
+            <!-- Navigation Links (Middle/Right) -->
+            <div class="hidden md:flex items-center space-x-8 mr-6">
+                <a href="{% url 'UserHome' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'UserHome' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">
+                    Dashboard Home
+                </a>
+                <a href="{% url 'prediction' %}" class="nav-link font-bold tracking-wide transition-colors duration-300 {% if request.resolver_match.url_name == 'prediction' %}text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]{% else %}text-white hover:text-emerald-300{% endif %}">
+                    Analyze Video
+                </a>
+            </div>
+
+            <!-- User Widget Cluster -->
+            <div class="flex items-center space-x-3">
+                {% if logged_in_user %}
+                <div class="hidden lg:flex flex-col items-end mr-1">
+                    <span class="text-sm font-bold text-gray-100 tracking-wide leading-none mb-1">{{ logged_in_user.name }}</span>
+                    <span class="text-[13px] font-medium text-emerald-400/90 tracking-wide leading-none">{{ logged_in_user.email }}</span>
+                </div>
+                <div class="w-14 h-14 rounded-full border-2 border-emerald-400/50 overflow-hidden shadow-[0_0_15px_rgba(52,211,153,0.4)]">
+                    {% if logged_in_user.profile_image %}
+                        <img src="{{ logged_in_user.profile_image.url }}" alt="Profile" class="w-full h-full object-cover">
+                    {% else %}
+                        <img src="https://ui-avatars.com/api/?name={{ logged_in_user.name|urlencode }}&background=0f172a&color=34d399&bold=true" alt="Profile" class="w-full h-full object-cover">
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Logout Link -->
+            <a href="{% url 'logout' %}" class="px-5 py-2.5 rounded-full border border-red-500/50 text-red-500 font-bold text-sm tracking-wide hover:bg-red-500 hover:text-white transition-all duration-300 hover:shadow-[0_0_15px_rgba(239,68,68,0.5)] flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Logout
+            </a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block messages %}
+{% if messages %}
+<div class="max-w-4xl mx-auto mb-6">
+    {% for message in messages %}
+    <div class="glass-panel p-4 mb-3 flex items-center {% if message.tags == 'success' %}border-emerald-500/30{% else %}border-red-500/30{% endif %}">
+        {% if message.tags == 'success' %}
+            <svg class="w-6 h-6 text-emerald-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="text-emerald-100 font-medium">{{ message }}</span>
+        {% else %}
+            <svg class="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="text-red-100 font-medium">{{ message }}</span>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
