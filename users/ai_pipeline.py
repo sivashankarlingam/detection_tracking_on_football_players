@@ -74,6 +74,11 @@ class FootballTracker:
         H_matrix, _ = cv2.findHomography(src_pts, dst_pts)
 
         def transform_point(cx, cy):
+            if H_matrix is None:
+                # Fallback proportional mapping if Homography fails (e.g. coordinates are all zeros)
+                # Maps directly to a standard 105mx68m pitch
+                return (cx / float(width)) * 105.0, (cy / float(height)) * 68.0
+                
             pt = np.array([[[cx, cy]]], dtype=np.float32)
             transformed = cv2.perspectiveTransform(pt, H_matrix)
             return transformed[0][0][0], transformed[0][0][1]
