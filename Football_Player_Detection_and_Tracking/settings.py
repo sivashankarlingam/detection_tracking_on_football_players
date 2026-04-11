@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'Football_Player_Detection_and_Tracking.wsgi.application'
 # ── Database ──────────────────────────────────────────────────────────────────
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres:IaXENrbaUHWF2U6C@db.akpojkxhztgpueclpzzf.supabase.co:5432/postgres',
+        default=os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite3'),
         conn_max_age=600
     )
 }
@@ -120,7 +120,7 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': 'sF6fdT9PEeazvuFSxsqLeRQEjyk',
 }
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.VideoMediaCloudinaryStorage'
 
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

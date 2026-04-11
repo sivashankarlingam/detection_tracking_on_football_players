@@ -54,18 +54,21 @@ class FootballTracker:
                 out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
         # --- Homography Setup (Standard 105m x 68m pitch) ---
+        # TODO: Replace the X, Y coordinates below with the EXACT pixel coordinates 
+        # of the 4 corners of the Penalty Box from your specific video feed.
         src_pts = np.array([
-            [width * 0.1, height * 0.9],
-            [width * 0.9, height * 0.9],
-            [width * 0.3, height * 0.4],
-            [width * 0.7, height * 0.4]
+            [0, 0],       # Bottom-Left Penalty Box Corner (Pixel X, Y)
+            [0, 0],       # Bottom-Right Penalty Box Corner (Pixel X, Y)
+            [0, 0],       # Top-Left Penalty Box Corner (Pixel X, Y)
+            [0, 0]        # Top-Right Penalty Box Corner (Pixel X, Y)
         ], dtype=np.float32)
 
+        # Mapping to the precise physical dimensions of a standard Penalty Box (40.3m x 16.5m)
         dst_pts = np.array([
-            [0, 68],
-            [105, 68],
-            [0, 0],
-            [105, 0]
+            [0, 16.5],       # Bottom-Left
+            [40.3, 16.5],    # Bottom-Right
+            [0, 0],          # Top-Left
+            [40.3, 0]        # Top-Right
         ], dtype=np.float32)
 
         H_matrix, _ = cv2.findHomography(src_pts, dst_pts)

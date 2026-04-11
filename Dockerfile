@@ -3,7 +3,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV CACHE_BUST=7
 WORKDIR /app
-RUN apt-get update && apt-get install -y ffmpeg libsm6 libxext6 libgl1 git && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ffmpeg libsm6 libxext6 libgl1-mesa-glx libglib2.0-0 git && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
