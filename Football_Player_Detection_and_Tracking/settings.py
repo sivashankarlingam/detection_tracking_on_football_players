@@ -75,7 +75,7 @@ WSGI_APPLICATION = 'Football_Player_Detection_and_Tracking.wsgi.application'
 # ── Database ──────────────────────────────────────────────────────────────────
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres.akpojkxhztgpueclpzzf:IaXENrbaUHWF2U6C@aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres',
+        default='postgresql://postgres:IaXENrbaUHWF2U6C@db.akpojkxhztgpueclpzzf.supabase.co:5432/postgres',
         conn_max_age=600
     )
 }
