@@ -312,6 +312,12 @@ def process_live_frame(request):
         if frame is None:
             return JsonResponse({'error': 'Invalid image data'}, status=400)
 
+        import time
+        start_time = time.time()
+        
+        player_count = 0
+        ball_detected = False
+
         # Use the globally initialized tracker to prevent huge lag on every POST
         if global_tracker.model is not None:
             results = global_tracker.model.track(frame, persist=False, classes=[0, 32], verbose=False)
@@ -321,12 +327,29 @@ def process_live_frame(request):
                     x1, y1, x2, y2 = map(int, box)
                     color = (0, 255, 0) if cls == 0 else (0, 0, 255)
                     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-                    label = "Player" if cls == 0 else "Ball"
+                    
+                    if cls == 0:
+                        label = "Player"
+                        player_count += 1
+                    else:
+                        label = "Ball"
+                        ball_detected = True
+                        
                     cv2.putText(frame, label, (x1, y1 - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
         _, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 75])
         encoded   = base64.b64encode(buffer).decode('utf-8')
-        return JsonResponse({'image': 'data:image/jpeg;base64,' + encoded})
+        
+        latency = int((time.time() - start_time) * 1000)
+        
+        return JsonResponse({
+            'image': 'data:image/jpeg;base64,' + encoded,
+            'stats': {
+                'players': player_count,
+                'ball': ball_detected,
+                'latency': latency
+            }
+        })
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
