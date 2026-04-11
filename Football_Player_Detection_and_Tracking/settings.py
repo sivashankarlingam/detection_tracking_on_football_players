@@ -120,7 +120,7 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': 'sF6fdT9PEeazvuFSxsqLeRQEjyk',
 }
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.VideoMediaCloudinaryStorage'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

@@ -1,4 +1,5 @@
 from django.db import models
+from cloudinary_storage.storage import VideoMediaCloudinaryStorage
 class UserRegistrationModel(models.Model):
     name = models.CharField(max_length=100)
     loginid = models.CharField(unique=True, max_length=100)
@@ -21,8 +22,8 @@ class UserRegistrationModel(models.Model):
 
 class VideoAnalysis(models.Model):
     user = models.ForeignKey(UserRegistrationModel, on_delete=models.CASCADE)
-    input_video = models.FileField(upload_to='videos/input/')
-    output_video = models.FileField(upload_to='videos/output/', blank=True, null=True)
+    input_video = models.FileField(upload_to='videos/input/', storage=VideoMediaCloudinaryStorage())
+    output_video = models.FileField(upload_to='videos/output/', storage=VideoMediaCloudinaryStorage(), blank=True, null=True)
     status = models.CharField(max_length=50, default='Pending') # Pending, Processing, Completed, Failed
     progress = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
