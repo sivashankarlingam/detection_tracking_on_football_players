@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     libsm6 \
     libxext6 \
     libgl1 \
+    libopenh264-7 \
     git \
  && rm -rf /var/lib/apt/lists/*
 
@@ -31,4 +32,4 @@ EXPOSE 7860
 
 # Command to run the application using Gunicorn
 # Hugging Face spaces use port 7860 by default
-CMD ["gunicorn", "Football_Player_Detection_and_Tracking.wsgi:application", "--bind", "0.0.0.0:7860"]
+CMD ["python manage.py migrate && gunicorn", "Football_Player_Detection_and_Tracking.wsgi:application", "--bind", "0.0.0.0:7860"]
