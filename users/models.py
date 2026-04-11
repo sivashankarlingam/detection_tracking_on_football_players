@@ -1,5 +1,6 @@
 from django.db import models
-from cloudinary_storage.storage import VideoMediaCloudinaryStorage
+from cloudinary_storage.storage import VideoMediaCloudinaryStorage, MediaCloudinaryStorage
+
 class UserRegistrationModel(models.Model):
     name = models.CharField(max_length=100)
     loginid = models.CharField(unique=True, max_length=100)
@@ -11,7 +12,7 @@ class UserRegistrationModel(models.Model):
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
     status = models.CharField(max_length=100, default='waiting')
-    profile_image = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    profile_image = models.ImageField(upload_to='profiles/', storage=MediaCloudinaryStorage(), blank=True, null=True)
 
     def __str__(self):
         return self.loginid
