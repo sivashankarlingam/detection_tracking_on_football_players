@@ -1,7 +1,7 @@
 FROM python:3.9-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV CACHE_BUST=5
+ENV CACHE_BUST=6
 WORKDIR /app
 RUN apt-get update && apt-get install -y ffmpeg libsm6 libxext6 libgl1 git && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
