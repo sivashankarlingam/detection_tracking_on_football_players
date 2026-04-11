@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import time
+import json
 
 try:
     from ultralytics import YOLO
@@ -16,9 +17,9 @@ class FootballTracker:
     def initialize_model(self):
         if self.model is None and YOLO is not None:
             # Load a pre-trained YOLOv8 model for tracking
-            # Reverting to yolov8n.pt (nano) for faster processing speeds
-            self.model = YOLO('yolov8n.pt') 
-            print("YOLOv8 model loaded successfully.")
+            # Using yolov8s.pt (small) for better accuracy on small objects like balls/sports players
+            self.model = YOLO('yolov8s.pt') 
+            print("YOLOv8s model loaded successfully.")
 
     def process_video(self, input_path, output_path, update_progress_callback=None):
         if YOLO is None:
@@ -42,7 +43,6 @@ class FootballTracker:
 
         # Use avc1 (H.264) for maximum compatibility with web browsers
         # Fallback to mp4v if avc1 is not supported by the system's ffmpeg
-        import cv2
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
         
@@ -74,7 +74,6 @@ class FootballTracker:
         last_ball_pos = None
         last_possession = "Contested"
 
-        import json
 
         # Iterate over frames using the model's tracking feature (ByteTrack)
         while cap.isOpened():
@@ -94,7 +93,7 @@ class FootballTracker:
                 if track_ids is not None:
                     track_ids = track_ids.int().cpu().numpy()
                 else:
-                    track_ids = []
+                    track_ids = [None] * len(boxes)
                 clss = results[0].boxes.cls.int().cpu().numpy()
 
                 # Track ball position for this frame
@@ -106,69 +105,76 @@ class FootballTracker:
                     x1, y1, x2, y2 = map(int, box)
                     cx, cy = int((x1 + x2) / 2), int(y2)  # Use bottom center for homography proxy
 
-                    if cls == 32: # Ball
-                        ball_detected_this_frame = True
-                        current_ball_cx, current_ball_cy = cx, cy
+                    speed_text = ""
+                    
+                    if track_id is not None:
+                        if cls == 32: # Ball
+                            ball_detected_this_frame = True
+                            current_ball_cx, current_ball_cy = cx, cy
 
-                        if last_ball_pos is not None and ball_lost_frames == 0:
-                            last_ball_velocity = (cx - last_ball_pos[0], cy - last_ball_pos[1])
-                        last_ball_pos = (cx, cy)
-                        ball_lost_frames = 0
+                            if last_ball_pos is not None and ball_lost_frames == 0:
+                                last_ball_velocity = (cx - last_ball_pos[0], cy - last_ball_pos[1])
+                            last_ball_pos = (cx, cy)
+                            ball_lost_frames = 0
 
-                        ball_tracks.append((cx, cy, current_time))
-                        if len(ball_tracks) > 5:
-                            p1, p2 = ball_tracks[-5], ball_tracks[-1]
-                            dist = np.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
-                            time_diff = p2[2] - p1[2]
-                            if time_diff > 0:
-                                b_speed = (dist / time_diff) / 10 # heuristic scale
-                                if b_speed > max_ball_speed:
-                                    max_ball_speed = min(b_speed, 120.0) # max realistic ball speed 120kmh
-                                    
-                    elif cls == 0: # Player
-                        if track_id not in player_frame_counts:
-                            player_frame_counts[track_id] = 0
-                        player_frame_counts[track_id] += 1
+                            ball_tracks.append((cx, cy, current_time))
+                            if len(ball_tracks) > 5:
+                                p1, p2 = ball_tracks[-5], ball_tracks[-1]
+                                dist = np.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+                                time_diff = p2[2] - p1[2]
+                                if time_diff > 0:
+                                    b_speed = (dist / time_diff) / 10 # heuristic scale
+                                    if b_speed > max_ball_speed:
+                                        max_ball_speed = min(b_speed, 120.0) # max realistic ball speed 120kmh
+                                        
+                        elif cls == 0: # Player
+                            if track_id not in player_frame_counts:
+                                player_frame_counts[track_id] = 0
+                            player_frame_counts[track_id] += 1
 
-                        players_this_frame.append((cx, cy, track_id))
-                        
-                        # Team Assignment via Initialization zone
-                        if track_id not in player_teams:
-                            player_teams[track_id] = "Team A" if cx < (width / 2) else "Team B"
-
-                        # Update history
-                        if track_id not in player_tracks:
-                            player_tracks[track_id] = []
-                            player_distances[track_id] = 0.0
-                            player_max_speeds[track_id] = 0.0
+                            players_this_frame.append((cx, cy, track_id))
                             
-                        player_tracks[track_id].append((cx, cy, current_time))
-                        
-                        # Keep only last 10 points
-                        if len(player_tracks[track_id]) > 10:
-                            player_tracks[track_id] = player_tracks[track_id][-10:]
+                            # Team Assignment via Initialization zone
+                            if track_id not in player_teams:
+                                player_teams[track_id] = "Team A" if cx < (width / 2) else "Team B"
 
-                        # Compute speed and distance
-                        speed_text = ""
-                        if len(player_tracks[track_id]) > 5:
-                            p1 = player_tracks[track_id][-5]
-                            p2 = player_tracks[track_id][-1]
-                            dist = np.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
-                            time_diff = p2[2] - p1[2]
+                            # Update history
+                            if track_id not in player_tracks:
+                                player_tracks[track_id] = []
+                                player_distances[track_id] = 0.0
+                                player_max_speeds[track_id] = 0.0
+                                
+                            player_tracks[track_id].append((cx, cy, current_time))
                             
-                            # Accumulate distance (heuristic mapping pixel->meters)
-                            player_distances[track_id] += dist * 0.05
-                            
-                            if time_diff > 0:
-                                speed = dist / time_diff
-                                kmh = min((speed / 50) + np.random.uniform(0, 2), 35.0)
-                                if kmh > player_max_speeds[track_id]:
-                                    player_max_speeds[track_id] = kmh
-                                speed_text = f" {kmh:.1f} km/h"
+                            # Keep only last 10 points
+                            if len(player_tracks[track_id]) > 10:
+                                player_tracks[track_id] = player_tracks[track_id][-10:]
+
+                            # Compute speed and distance
+                            if len(player_tracks[track_id]) > 5:
+                                p1 = player_tracks[track_id][-5]
+                                p2 = player_tracks[track_id][-1]
+                                dist = np.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+                                time_diff = p2[2] - p1[2]
+                                
+                                # Accumulate distance (heuristic mapping pixel->meters)
+                                player_distances[track_id] += dist * 0.05
+                                
+                                if time_diff > 0:
+                                    speed = dist / time_diff
+                                    kmh = min((speed / 50) + np.random.uniform(0, 2), 35.0)
+                                    if kmh > player_max_speeds[track_id]:
+                                        player_max_speeds[track_id] = kmh
+                                    speed_text = f" {kmh:.1f} km/h"
 
                     # Draw Visuals
                     color = (0, 255, 0) if cls == 0 else (0, 0, 255) # Green for player, Red for ball
-                    label = f"ID: {track_id}{speed_text}" if cls == 0 else "Ball"
+                    
+                    if track_id is not None:
+                        label = f"ID: {track_id}{speed_text}" if cls == 0 else "Ball"
+                    else:
+                        label = "Player" if cls == 0 else "Ball"
+                        
                     cv2.ellipse(frame, (cx, cy), (int((x2-x1)/2), 10), 0, 0, 360, color, 2)
                     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                     (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
@@ -314,27 +320,33 @@ class FootballTracker:
                 track_ids = results[0].boxes.id
                 if track_ids is not None:
                     track_ids = track_ids.int().cpu().numpy()
-                else: track_ids = []
+                else: track_ids = [None] * len(boxes)
                 clss = results[0].boxes.cls.int().cpu().numpy()
 
                 for box, track_id, cls in zip(boxes, track_ids, clss):
                     x1, y1, x2, y2 = map(int, box)
                     cx, cy = int((x1 + x2) / 2), int(y2)
 
-                    if track_id not in player_tracks: player_tracks[track_id] = []
-                    player_tracks[track_id].append((cx, cy, current_time))
-                    if len(player_tracks[track_id]) > 10: player_tracks[track_id] = player_tracks[track_id][-10:]
-
                     speed_text = ""
-                    if len(player_tracks[track_id]) > 5:
-                        p1, p2 = player_tracks[track_id][-5], player_tracks[track_id][-1]
-                        time_diff = p2[2] - p1[2]
-                        if time_diff > 0:
-                            dist = np.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
-                            speed_text = f" {min((dist/time_diff)/50, 35):.1f}km/h"
+                    if track_id is not None:
+                        if track_id not in player_tracks: player_tracks[track_id] = []
+                        player_tracks[track_id].append((cx, cy, current_time))
+                        if len(player_tracks[track_id]) > 10: player_tracks[track_id] = player_tracks[track_id][-10:]
+
+                        if len(player_tracks[track_id]) > 5:
+                            p1, p2 = player_tracks[track_id][-5], player_tracks[track_id][-1]
+                            time_diff = p2[2] - p1[2]
+                            if time_diff > 0:
+                                dist = np.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+                                speed_text = f" {min((dist/time_diff)/50, 35):.1f}km/h"
 
                     color = (0, 255, 0) if cls == 0 else (0, 0, 255)
-                    label = f"ID:{track_id}{speed_text}" if cls == 0 else "Ball"
+                    
+                    if track_id is not None:
+                        label = f"ID:{track_id}{speed_text}" if cls == 0 else "Ball"
+                    else:
+                        label = "Player" if cls == 0 else "Ball"
+                        
                     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                     (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
                     cv2.rectangle(frame, (x1, y1-25), (x1+w, y1), (0,0,0), -1)

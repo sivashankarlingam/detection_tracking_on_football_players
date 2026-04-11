@@ -179,13 +179,9 @@
                     <button type="button" class="act-btn" style="background:rgba(255,255,255,0.05);color:var(--text-soft);border-color:var(--border);padding:0.6rem 1.5rem;" data-bs-dismiss="modal">
                         <i class="bi bi-x-lg"></i> Cancel
                     </button>
-                    <form action="{% url 'delete_users' %}" method="POST" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="uid" value="{{ i.id }}">
-                        <button type="submit" class="act-btn act-btn-del" style="padding:0.6rem 1.5rem;">
-                            <i class="bi bi-trash3-fill"></i> Yes, Delete
-                        </button>
-                    </form>
+                    <button type="button" class="act-btn act-btn-del" onclick="deleteUser({{i.id}})" style="padding:0.6rem 1.5rem;">
+                        <i class="bi bi-trash3-fill"></i> Yes, Delete
+                    </button>
                 </div>
             </div>
         </div>
@@ -196,27 +192,18 @@
 <div class="modal fade" id="editModal{{ i.id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content glass-panel shadow-lg">
-            <!-- Header -->
-            <div class="modal-header" style="border-bottom:1px solid var(--border); padding:1.25rem 1.5rem;">
-                <div class="d-flex align-items-center gap-3">
-                    {% if i.profile_image %}
-                    <img src="{{ i.profile_image.url }}" alt="{{ i.name }}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid var(--border-blue);">
-                    {% else %}
-                    <img src="https://ui-avatars.com/api/?name={{ i.name|urlencode }}&background=0a1628&color=60a5fa&bold=true&rounded=true" alt="{{ i.name }}" style="width:38px;height:38px;border-radius:50%;">
-                    {% endif %}
-                    <div>
-                        <h5 style="font-family:'Syne',sans-serif; font-weight:800; color:#fff; margin:0; font-size:1.05rem;">
-                            <i class="bi bi-pencil-fill me-2" style="color:var(--blue-lt); font-size:0.9rem;"></i>Edit Profile
-                        </h5>
-                        <div style="font-size:0.72rem; color:var(--text-muted);">@{{ i.loginid }}</div>
-                    </div>
-                </div>
+            <!-- Edit Header -->
+            <div class="modal-header border-0 pb-0" style="padding:1.5rem 1.5rem 0.5rem;">
+                <h5 class="modal-title" style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;">
+                    <i class="bi bi-pencil-fill me-2 text-primary"></i> Edit Profile
+                    <div style="font-size:0.72rem; color:var(--text-muted);">@{{ i.loginid }}</div>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter:invert(1) opacity(0.5);"></button>
             </div>
 
             <!-- Body -->
             <div class="modal-body p-4">
-                <form action="{% url 'edit_users' %}" method="post" enctype="multipart/form-data">
+                <form id="editForm{{i.id}}" onsubmit="editUser({{i.id}}); return false;" enctype="multipart/form-data">
                     {% csrf_token %}
                     <input type="hidden" name="uid" value="{{ i.id }}">
 
@@ -283,7 +270,7 @@
                         <button type="button" class="act-btn" style="background:rgba(255,255,255,0.04);color:var(--text-soft);border-color:var(--border);padding:0.6rem 1.25rem;" data-bs-dismiss="modal">
                             <i class="bi bi-x-lg"></i> Cancel
                         </button>
-                        <button type="submit" class="btn-glass" style="padding:0.65rem 1.75rem;width:auto;">
+                        <button type="submit" id="saveBtn{{i.id}}" class="btn-glass" style="padding:0.65rem 1.75rem;width:auto;">
                             <i class="bi bi-floppy-fill"></i> Save Changes
                         </button>
                     </div>
@@ -297,19 +284,70 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
     $('#usersTable').DataTable({
-        pageLength: 10,
-        language: { search: '', searchPlaceholder: 'Search users…' },
-        dom: "<'row mb-3'<'col-md-6'l><'col-md-6 d-flex justify-content-end'f>>" +
-             "<'row'<'col-sm-12'tr>>" +
-             "<'row mt-3'<'col-md-5'i><'col-md-7 d-flex justify-content-end'p>>",
-        drawCallback: function() {
-            $('.dataTables_filter input').addClass('glass-input ms-2');
-            $('.dataTables_length select').addClass('form-select form-select-sm d-inline-block w-auto ms-1 me-1 glass-input');
-        }
+        "pageLength": 10,
+        "language": {
+            "search": "",
+            "searchPlaceholder": "Search users..."
+        },
+        "dom": '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row mt-4"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
     });
 });
+
+function deleteUser(uid) {
+    Swal.fire({
+        title: 'Delete User?',
+        text: "This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        background: 'var(--navy-2)',
+        color: '#fff',
+        confirmButtonColor: '#f43f5e',
+        cancelButtonColor: 'rgba(255,255,255,0.1)',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{% url "delete_users" %}',
+                type: 'POST',
+                data: {uid: uid},
+                success: function(res) {
+                    Swal.fire({title: 'Deleted!', text: 'User has been removed.', icon: 'success', background: 'var(--navy-2)', color: '#fff', showConfirmButton: false, timer: 1500})
+                    .then(() => window.location.href='/userDetails?t=' + (new Date().getTime()));
+                },
+                error: function(err) {
+                    Swal.fire('Error!', err.responseText || 'Failed to delete user.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function editUser(uid) {
+    const btn = $('#saveBtn' + uid);
+    btn.prop('disabled', true).html('<i class="bi bi-arrow-repeat spin"></i> Saving...');
+    
+    const formData = new FormData(document.getElementById('editForm' + uid));
+    
+    $.ajax({
+        url: '{% url "edit_users" %}',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function(res) {
+            $('#editModal' + uid).modal('hide');
+            Swal.fire({title: 'Saved!', text: 'Profile updated successfully.', icon: 'success', background: 'var(--navy-2)', color: '#fff', timer: 1500, showConfirmButton: false})
+            .then(() => window.location.href='/userDetails?t=' + (new Date().getTime()));
+        },
+        error: function(err) {
+            btn.prop('disabled', false).html('<i class="bi bi-floppy-fill"></i> Save Changes');
+            Swal.fire('Error!', err.responseText || 'Failed to update user profile.', 'error');
+        }
+    });
+}
 </script>
 {% endblock %}
