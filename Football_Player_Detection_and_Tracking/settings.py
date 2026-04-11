@@ -106,6 +106,7 @@ STATICFILES_DIRS = [
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_MANIFEST_STRICT = False
 
 # ── Media files ───────────────────────────────────────────────────────────────
 # Cloudinary Storage Configuration
