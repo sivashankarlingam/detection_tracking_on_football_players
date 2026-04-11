@@ -56,23 +56,15 @@ def process_video_task(analysis_id):
                         else:
                             break
 
-        # ── Download Cloudinary input video to a local temp file ─────────────
-        # cv2.VideoCapture() cannot open HTTP/HTTPS URLs directly — it must
-        # receive a local filesystem path. We download the Cloudinary video
-        # from its storage URL to a temp file and pass that path to the AI pipeline.
-        import urllib.request
-        input_url = analysis.input_video.url
-        # If running locally, analysis.input_video.url might be a local path,
-        # but in production it's a Cloudinary URL. urllib handles both if they are valid URLs.
-        input_ext = os.path.splitext(input_url.split('?')[0])[-1] or '.mp4'
-        input_temp_path = os.path.join(temp_dir, f"input_{analysis_id}{input_ext}")
+        # ── Access local input video file ─────────────
+        # The input video was saved locally in MEDIA_ROOT by FileSystemStorage during upload,
+        # which prevents the frontend from throwing Cloudinary size limits or timeouts.
+        input_local_path = os.path.join(settings.MEDIA_ROOT, analysis.input_video.name)
 
-        print(f"DEBUG: Downloading input video from storage: {input_url}")
-        urllib.request.urlretrieve(input_url, input_temp_path)
-        print(f"DEBUG: Downloaded to temp path: {input_temp_path}")
+        print(f"DEBUG: Using local input video: {input_local_path}")
 
-        # Run the AI pipeline using the local temp file
-        tracker.process_video(input_temp_path, output_temp_path, update_progress)
+        # Run the AI pipeline using the local file
+        tracker.process_video(input_local_path, output_temp_path, update_progress)
 
         # ── FFmpeg H.264 Re-encoding ─────────────
         # OpenCV in Docker often falls back to 'mp4v' because it lacks the 'avc1'
@@ -98,30 +90,36 @@ def process_video_task(analysis_id):
             if os.path.exists(h264_temp_path):
                 os.remove(h264_temp_path)
 
-        # Update final state - Upload processed video to cloudinary
+        # ── Upload BOTH videos to Cloudinary ─────────────
         analysis = VideoAnalysis.objects.get(id=analysis_id)
         
-        # Uploading to Cloudinary
-        upload_data = upload(
+        print("Uploading original input video to Cloudinary...")
+        input_upload_data = upload(
+            input_local_path,
+            resource_type="video",
+            folder="videos/input/"
+        )
+        analysis.input_video.name = input_upload_data['public_id']
+
+        print("Uploading processed output video to Cloudinary...")
+        output_upload_data = upload(
             output_temp_path,
             resource_type="video",
             folder="videos/output/"
         )
-        
-        # Cloudinary returns 'public_id' we need to store for MediaCloudinaryStorage.
-        # usually `public_id` or string of the path. Django-Cloudinary-Storage handles FileField transparently
-        analysis.output_video.name = upload_data['public_id']
+        analysis.output_video.name = output_upload_data['public_id']
+
         analysis.progress = 100
         analysis.status = 'Completed'
         analysis.save()
         
-        # Clean up both temporary files to save space
+        # Clean up both local files to save space
         if os.path.exists(output_temp_path):
             os.remove(output_temp_path)
-        if 'input_temp_path' in locals() and os.path.exists(input_temp_path):
-            os.remove(input_temp_path)
+        if os.path.exists(input_local_path):
+            os.remove(input_local_path)
             
-        print(f"Video {analysis_id} processing completed.")
+        print(f"Video {analysis_id} processing and upload completed.")
 
     except Exception as e:
         print(f"Error processing video {analysis_id}: {str(e)}")
