@@ -3,7 +3,8 @@ Django settings for Football_Player_Detection_and_Tracking project.
 """
 
 from pathlib import Path
-
+import os
+import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -32,7 +33,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
     'users',
     'admins',
 ]
@@ -71,10 +74,10 @@ WSGI_APPLICATION = 'Football_Player_Detection_and_Tracking.wsgi.application'
 
 # ── Database ──────────────────────────────────────────────────────────────────
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='postgresql://postgres:IaXENrbaUHWF2U6C@db.akpojkxhztgpueclpzzf.supabase.co:5432/postgres',
+        conn_max_age=600
+    )
 }
 
 
@@ -105,6 +108,15 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ── Media files ───────────────────────────────────────────────────────────────
+# Cloudinary Storage Configuration
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dgf0nhyaf',
+    'API_KEY': '435631362239581',
+    'API_SECRET': 'sF6fdT9PEeazvuFSxsqLeRQEjyk',
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 

@@ -11,3 +11,5 @@ lapx>=0.5.5
 torch<=2.5.1
 torchvision<=0.20.1
 torchaudio<=2.5.1
+django-cloudinary-storage==0.3.0
+cloudinary==1.38.0

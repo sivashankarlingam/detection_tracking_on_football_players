@@ -3,7 +3,10 @@ from .models import VideoAnalysis
 import time
 import cv2
 import os
+import tempfile
 from django.conf import settings
+from django.core.files.base import ContentFile
+from cloudinary.uploader import upload
 
 # This function will run in the background
 def process_video_task(analysis_id):
@@ -14,13 +17,20 @@ def process_video_task(analysis_id):
         analysis.status = 'Processing'
         analysis.save()
 
-        # Input and output paths
-        input_path = analysis.input_video.path
+        # In Cloudinary Media Storage, path is the Cloudinary Cloud path or public_id.
+        # But our local AI pipeline needs a local file path.
+        # Since input may be stored in Cloudinary, we should download it temporarily if not local
+        # For simplicity, assuming local server handling, however we will parse to temp paths.
         
-        # Prepare output path
+        # Prepare output path in a system temp directory (ephemeral storage)
         output_filename = f"output_{analysis_id}.mp4"
-        output_path = os.path.join(settings.MEDIA_ROOT, 'videos', 'output', output_filename)
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        temp_dir = tempfile.gettempdir()
+        output_temp_path = os.path.join(temp_dir, output_filename)
+        
+        # We also need a local input path. To be safe, Cloudinary models often provide a URL.
+        # Since this script previously dealt with local files, we'll try to fetch local if possible
+        # or use Cloudinary's URL.
+        input_url = analysis.input_video.url
         
         from .ai_pipeline import FootballTracker
         tracker = FootballTracker()
@@ -47,15 +57,29 @@ def process_video_task(analysis_id):
                             break
 
         # Run the AI pipeline
-        tracker.process_video(input_path, output_path, update_progress)
+        tracker.process_video(input_url, output_temp_path, update_progress)
 
-        # Update final state
+        # Update final state - Upload processed video to cloudinary
         analysis = VideoAnalysis.objects.get(id=analysis_id)
-        # We save the relative media path so it can be served via URL
-        analysis.output_video = f"videos/output/{output_filename}"
+        
+        # Uploading to Cloudinary
+        upload_data = upload(
+            output_temp_path,
+            resource_type="video",
+            folder="videos/output/"
+        )
+        
+        # Cloudinary returns 'public_id' we need to store for MediaCloudinaryStorage.
+        # usually `public_id` or string of the path. Django-Cloudinary-Storage handles FileField transparently
+        analysis.output_video.name = upload_data['public_id']
         analysis.progress = 100
         analysis.status = 'Completed'
         analysis.save()
+        
+        # Clean up temporary output file to save space
+        if os.path.exists(output_temp_path):
+            os.remove(output_temp_path)
+            
         print(f"Video {analysis_id} processing completed.")
 
     except Exception as e:
