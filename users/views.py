@@ -138,14 +138,14 @@ def upload_video(request):
         return redirect('UserLogin')
 
     if request.method == 'POST' and request.FILES.get('video'):
+    if request.method == 'POST' and request.FILES.get('video'):
         uploaded_file = request.FILES['video']
-        fs = FileSystemStorage()
-        input_path = fs.save(uploaded_file.name, uploaded_file)
-
         user = UserRegistrationModel.objects.get(id=request.session['id'])
+        
+        # Save directly to model, which will use Cloudinary automatically
         analysis = VideoAnalysis.objects.create(
             user=user,
-            input_video=input_path,
+            input_video=uploaded_file,
             status='Pending',
             progress=0
         )

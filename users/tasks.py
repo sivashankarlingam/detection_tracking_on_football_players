@@ -56,15 +56,23 @@ def process_video_task(analysis_id):
                         else:
                             break
 
-        # ── Access local input video file ─────────────
-        # The input video is saved locally in MEDIA_ROOT by FileSystemStorage during upload.
-        # We can bypass Cloudinary entirely and read it directly from disk!
-        input_local_path = os.path.join(settings.MEDIA_ROOT, analysis.input_video.name)
+        # ── Download Cloudinary input video to a local temp file ─────────────
+        # cv2.VideoCapture() cannot open HTTP/HTTPS URLs directly — it must
+        # receive a local filesystem path. We download the Cloudinary video
+        # from its storage URL to a temp file and pass that path to the AI pipeline.
+        import urllib.request
+        input_url = analysis.input_video.url
+        # If running locally, analysis.input_video.url might be a local path,
+        # but in production it's a Cloudinary URL. urllib handles both if they are valid URLs.
+        input_ext = os.path.splitext(input_url.split('?')[0])[-1] or '.mp4'
+        input_temp_path = os.path.join(temp_dir, f"input_{analysis_id}{input_ext}")
 
-        print(f"Using local input video: {input_local_path}")
+        print(f"DEBUG: Downloading input video from storage: {input_url}")
+        urllib.request.urlretrieve(input_url, input_temp_path)
+        print(f"DEBUG: Downloaded to temp path: {input_temp_path}")
 
-        # Run the AI pipeline using the local file
-        tracker.process_video(input_local_path, output_temp_path, update_progress)
+        # Run the AI pipeline using the local temp file
+        tracker.process_video(input_temp_path, output_temp_path, update_progress)
 
         # ── FFmpeg H.264 Re-encoding ─────────────
         # OpenCV in Docker often falls back to 'mp4v' because it lacks the 'avc1'
@@ -107,9 +115,11 @@ def process_video_task(analysis_id):
         analysis.status = 'Completed'
         analysis.save()
         
-        # Clean up temporary output file to save space
+        # Clean up both temporary files to save space
         if os.path.exists(output_temp_path):
             os.remove(output_temp_path)
+        if 'input_temp_path' in locals() and os.path.exists(input_temp_path):
+            os.remove(input_temp_path)
             
         print(f"Video {analysis_id} processing completed.")
 
