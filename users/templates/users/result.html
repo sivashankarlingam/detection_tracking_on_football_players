@@ -132,6 +132,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         try {
@@ -142,9 +143,28 @@
             const distData = JSON.parse('{{ dist_data|default:"[]"|escapejs }}' || '[]');
 
             // Chart Defaults for Dark Theme
-            Chart.defaults.color = '#94a3b8'; // slate-400
-            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+            Chart.defaults.color = '#cbd5e1'; // slate-300
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
             Chart.defaults.font.family = "'Inter', sans-serif";
+            
+            // Register DataLabels Plugin globally
+            Chart.register(ChartDataLabels);
+
+            // Dynamic Gradients based on performance context
+            const speedColors = [
+                'rgba(239, 68, 68, 0.8)', // red (fastest)
+                'rgba(249, 115, 22, 0.8)', // orange
+                'rgba(245, 158, 11, 0.8)', // amber
+                'rgba(59, 130, 246, 0.8)', // blue
+                'rgba(16, 185, 129, 0.8)'  // green
+            ];
+            const distColors = [
+                'rgba(139, 92, 246, 0.8)', // violet (furthest)
+                'rgba(168, 85, 247, 0.8)', // purple
+                'rgba(217, 70, 239, 0.8)', // fuchsia
+                'rgba(236, 72, 153, 0.8)', // pink
+                'rgba(244, 63, 94, 0.8)'   // rose
+            ];
 
             // Speed Chart
             const speedCtx = document.getElementById('speedChart').getContext('2d');
@@ -153,23 +173,36 @@
                 data: {
                     labels: speedLabels.length > 0 ? speedLabels : ['No Data'],
                     datasets: [{
-                        label: 'Max Speed (km/h)',
+                        label: 'Max Speed',
                         data: speedData.length > 0 ? speedData : [0],
-                        backgroundColor: 'rgba(59, 130, 246, 0.6)', // blue-500
-                        borderColor: 'rgba(96, 165, 250, 1)',      // blue-400
-                        borderWidth: 2,
-                        borderRadius: 6,
-                        hoverBackgroundColor: 'rgba(59, 130, 246, 0.8)'
+                        backgroundColor: speedColors.slice(0, Math.max(1, speedData.length)),
+                        borderWidth: 0,
+                        borderRadius: 8,
+                        barThickness: 'flex'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false }
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: { label: (ctx) => `${ctx.raw} km/h` }
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            anchor: 'end',
+                            align: 'bottom',
+                            offset: 8,
+                            font: { weight: 'bold', size: 14 },
+                            formatter: (val) => val > 0 ? val + ' km/h' : ''
+                        }
                     },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: 'Speed (km/h)', color: '#64748b' }
+                        },
                         x: { grid: { display: false } }
                     }
                 }
@@ -184,21 +217,33 @@
                     datasets: [{
                         data: posData,
                         backgroundColor: [
-                            'rgba(59, 130, 246, 0.8)', // blue-500
-                            'rgba(239, 68, 68, 0.8)',  // red-500
-                            'rgba(245, 158, 11, 0.8)'  // amber-500
+                            'rgba(56, 189, 248, 0.9)', // sky
+                            'rgba(251, 113, 133, 0.9)', // rose
+                            'rgba(250, 204, 21, 0.9)'  // yellow
                         ],
-                        borderColor: 'rgba(15, 23, 42, 1)', // slate-900 border to match bg
-                        borderWidth: 4,
-                        hoverOffset: 8
+                        borderColor: '#0f172a', // slate-900 
+                        borderWidth: 6,
+                        hoverOffset: 12
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '65%',
+                    cutout: '68%',
                     plugins: {
-                        legend: { position: 'bottom', labels: { padding: 20, color: '#e2e8f0' } }
+                        legend: { position: 'bottom', labels: { padding: 20, font: { weight: 'bold'} } },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: '900', size: 16 },
+                            formatter: (value, ctx) => {
+                                let sum = 0;
+                                let dataArr = ctx.chart.data.datasets[0].data;
+                                dataArr.map(data => { sum += data; });
+                                if (sum === 0) return '';
+                                let percentage = (value * 100 / sum).toFixed(1) + "%";
+                                return percentage;
+                            }
+                        }
                     }
                 }
             });
@@ -210,13 +255,12 @@
                 data: {
                     labels: distLabels.length > 0 ? distLabels : ['No Data'],
                     datasets: [{
-                        label: 'Distance (meters prox.)',
+                        label: 'Total Distance',
                         data: distData.length > 0 ? distData : [0],
-                        backgroundColor: 'rgba(16, 185, 129, 0.6)', // emerald-500
-                        borderColor: 'rgba(52, 211, 153, 1)',       // emerald-400
-                        borderWidth: 2,
-                        borderRadius: 6,
-                        hoverBackgroundColor: 'rgba(16, 185, 129, 0.8)'
+                        backgroundColor: distColors.slice(0, Math.max(1, distData.length)),
+                        borderWidth: 0,
+                        borderRadius: 8,
+                        barThickness: 'flex'
                     }]
                 },
                 options: {
@@ -224,10 +268,24 @@
                     maintainAspectRatio: false,
                     indexAxis: 'y', // Render as horizontal bar
                     plugins: {
-                        legend: { display: false }
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: { label: (ctx) => `${ctx.raw} m` }
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            anchor: 'end',
+                            align: 'start',
+                            offset: 12,
+                            font: { weight: 'bold', size: 14 },
+                            formatter: (val) => val > 0 ? val + ' meters' : ''
+                        }
                     },
                     scales: {
-                        x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: 'Distance (meters)', color: '#64748b' }
+                        },
                         y: { grid: { display: false } }
                     }
                 }
