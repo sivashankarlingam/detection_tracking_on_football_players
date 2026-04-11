@@ -14,23 +14,42 @@
             <p class="text-lg text-gray-400 font-medium">Analyze pre-recorded match footage or track live using your webcam</p>
         </div>
 
-        <!-- Input Selection Tabs -->
-        <div class="flex flex-col sm:flex-row justify-center gap-4 mb-10 border-b border-white/10 pb-6" id="uploadTabs">
-            <button id="tab-file" class="tab-btn active px-6 py-3 rounded-full font-bold transition-all duration-300 flex items-center justify-center flex-1 max-w-[250px] mx-auto sm:mx-0">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                File Upload
+        <!-- Mode Selection Cards (shown first, before any panel opens) -->
+        <div id="modeSelection" class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+            <!-- Video Analysis Card -->
+            <button id="tab-file" onclick="selectMode('file')" class="mode-card group flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/15 hover:border-emerald-400 transition-all duration-300 hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] hover:scale-105">
+                <div class="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4 group-hover:bg-emerald-500/20 transition-all duration-300 ring-2 ring-emerald-500/20">
+                    <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Video Analysis</h3>
+                <p class="text-sm text-gray-400 text-center">Upload a pre-recorded match video (MP4, AVI) for AI analysis</p>
+                <span class="mt-4 px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider">Upload File</span>
             </button>
-            <button id="tab-cam" class="tab-btn px-6 py-3 rounded-full font-bold transition-all duration-300 flex items-center justify-center flex-1 max-w-[250px] mx-auto sm:mx-0">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                Live Detection Server
+
+            <!-- Live Cam Card -->
+            <button id="tab-cam" onclick="selectMode('cam')" class="mode-card group flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-cyan-500/30 bg-cyan-500/5 hover:bg-cyan-500/15 hover:border-cyan-400 transition-all duration-300 hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] hover:scale-105">
+                <div class="w-16 h-16 rounded-full bg-cyan-500/10 flex items-center justify-center mb-4 group-hover:bg-cyan-500/20 transition-all duration-300 ring-2 ring-cyan-500/20">
+                    <svg class="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 002 2v8a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Live Detection</h3>
+                <p class="text-sm text-gray-400 text-center">Use your webcam for real-time AI player detection and tracking</p>
+                <span class="mt-4 px-4 py-1.5 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-bold uppercase tracking-wider">Start Camera</span>
+            </button>
+        </div>
+
+        <!-- Back button (hidden initially) -->
+        <div id="backBtnContainer" class="hidden mb-6">
+            <button onclick="goBack()" class="flex items-center text-sm text-gray-400 hover:text-white transition-colors duration-200">
+                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                Back to selection
             </button>
         </div>
 
         <form id="uploadForm" method="post" enctype="multipart/form-data" class="max-w-3xl mx-auto">
             {% csrf_token %}
             
-            <!-- Mode: File Upload -->
-            <div id="fileArea" class="animate-fade-in">
+            <!-- Mode: File Upload (hidden until selected) -->
+            <div id="fileArea" class="hidden animate-fade-in">
                 <div class="border-2 border-dashed border-emerald-500/40 bg-slate-900/40 rounded-2xl p-10 mb-8 relative transition-all duration-300 hover:border-emerald-400 hover:bg-emerald-900/20 group cursor-pointer" id="dropZone">
                     <input type="file" name="video" accept="video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" id="videoInput">
                     
@@ -54,7 +73,7 @@
                 </div>
             </div>
 
-            <!-- Mode: Live Web Camera Server via Browser WebRTC -->
+            <!-- Mode: Live Web Camera Server via Browser WebRTC (hidden until selected) -->
             <div id="camArea" class="hidden mb-8 animate-fade-in">
                 <div class="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4 text-left mb-6 flex items-start">
                     <svg class="w-6 h-6 text-cyan-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -90,7 +109,7 @@
                 <p class="text-xs text-gray-400 font-medium text-center" id="progressStatusText">Initializing AI pipeline...</p>
             </div>
 
-            <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-4 px-10 rounded-full text-lg shadow-[0_0_20px_rgba(16,185,129,0.5)] hover:shadow-[0_0_30px_rgba(16,185,129,0.7)] transition-all duration-300 flex items-center justify-center mx-auto hover:scale-105" id="submitBtn">
+            <button type="submit" class="hidden bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-4 px-10 rounded-full text-lg shadow-[0_0_20px_rgba(16,185,129,0.5)] hover:shadow-[0_0_30px_rgba(16,185,129,0.7)] transition-all duration-300 flex items-center justify-center mx-auto hover:scale-105" id="submitBtn">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                 Analyze Match File
             </button>
@@ -125,22 +144,10 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* --- Strict Responsive Constraints (Hugging Face Mobile Requirements) --- */
+    /* ------ Desktop: Keep tab-based layout, don't force both panels open ------ */
     @media (min-width: 769px) {
         #uploadForm {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
             max-width: 100% !important;
-        }
-        #fileArea, #camArea {
-            display: block !important;
-        }
-        #uploadTabs { 
-            display: none !important; 
-        }
-        #submitBtn, #uploadProgress { 
-            grid-column: span 2; 
         }
     }
     @media (max-width: 768px) {
@@ -165,39 +172,42 @@
 </style>
 
 <script>
-    let currentView = 'file';
+    let currentView = null; // nothing selected by default
 
-    // Tabs Logic
-    document.getElementById('tab-file').addEventListener('click', function() { 
-        currentView = 'file'; 
-        document.getElementById('fileArea').classList.remove('hidden'); 
-        document.getElementById('camArea').classList.add('hidden'); 
-        document.getElementById('submitBtn').classList.remove('hidden');
-        
-        this.classList.add('active');
-        document.getElementById('tab-cam').classList.remove('active');
-        
-        // Stop stream by removing src
+    function selectMode(mode) {
+        currentView = mode;
+        // Hide selection cards, show back button
+        document.getElementById('modeSelection').classList.add('hidden');
+        document.getElementById('backBtnContainer').classList.remove('hidden');
+
+        if (mode === 'file') {
+            document.getElementById('fileArea').classList.remove('hidden');
+            document.getElementById('camArea').classList.add('hidden');
+            document.getElementById('submitBtn').classList.remove('hidden');
+            // Stop cam if was running
+            document.getElementById('liveFeedImg').src = "";
+            if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+        } else {
+            document.getElementById('camArea').classList.remove('hidden');
+            document.getElementById('fileArea').classList.add('hidden');
+            document.getElementById('submitBtn').classList.add('hidden');
+            startBrowserWebcam();
+        }
+    }
+
+    function goBack() {
+        currentView = null;
+        // Stop cam
         document.getElementById('liveFeedImg').src = "";
-    });
-
-    let cameraInterval = null;
-    let localStream = null;
-
-    document.getElementById('tab-cam').addEventListener('click', function() { 
-        currentView = 'cam'; 
-        document.getElementById('camArea').classList.remove('hidden'); 
-        document.getElementById('fileArea').classList.add('hidden'); 
-        
-        // We hide the standard file upload submit button because the camera feed is live on backend
-        document.getElementById('submitBtn').classList.add('hidden');
-
-        this.classList.add('active');
-        document.getElementById('tab-file').classList.remove('active');
-        
-        // Start the web browser native camera access
-        startBrowserWebcam();
-    });
+        if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+        // Hide panels, show selection again
+        document.getElementById('fileArea').classList.add('hidden');
+        document.getElementById('camArea').classList.add('hidden');
+        document.getElementById('submitBtn').classList.remove('hidden');
+        document.getElementById('backBtnContainer').classList.add('hidden');
+        document.getElementById('modeSelection').classList.remove('hidden');
+        document.getElementById('uploadProgress').classList.add('hidden');
+    }
 
     function startBrowserWebcam() {
         const video = document.getElementById('webcamVideo');
