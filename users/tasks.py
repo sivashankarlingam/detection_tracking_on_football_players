@@ -66,6 +66,30 @@ def process_video_task(analysis_id):
         # Run the AI pipeline using the local file
         tracker.process_video(input_local_path, output_temp_path, update_progress)
 
+        # ── FFmpeg H.264 Re-encoding ─────────────
+        # OpenCV in Docker often falls back to 'mp4v' because it lacks the 'avc1'
+        # plugin. Since 'mp4v' cannot be played natively in web browsers, we use
+        # the system's FFmpeg CLI to correctly re-encode the file to H.264.
+        import subprocess
+        h264_temp_path = output_temp_path.rsplit('.', 1)[0] + "_h264.mp4"
+        try:
+            print(f"Re-encoding output to H.264 using FFmpeg... {output_temp_path}")
+            # -y overwrites, -vcodec libx264 enforces proper browser support
+            subprocess.run([
+                'ffmpeg', '-y', '-i', output_temp_path,
+                '-vcodec', 'libx264', '-crf', '23', '-preset', 'fast',
+                '-pix_fmt', 'yuv420p', h264_temp_path
+            ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+            
+            # Replace the old mp4v file with the newly encoded H.264 file
+            os.replace(h264_temp_path, output_temp_path)
+            print("Successfully re-encoded to proper H.264.")
+        except subprocess.CalledProcessError as e:
+            print(f"FFmpeg re-encoding failed: {e.stderr.decode('utf-8', errors='ignore')}")
+            # If it fails, it will safely fall back to uploading the original mp4v
+            if os.path.exists(h264_temp_path):
+                os.remove(h264_temp_path)
+
         # Update final state - Upload processed video to cloudinary
         analysis = VideoAnalysis.objects.get(id=analysis_id)
         
