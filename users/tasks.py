@@ -73,7 +73,7 @@ def process_video_task(analysis_id):
         import subprocess
         h264_temp_path = output_temp_path.rsplit('.', 1)[0] + "_h264.mp4"
         try:
-            print(f"Re-encoding output to H.264 using FFmpeg... {output_temp_path}")
+            print(f"DEBUG: Starting final FFmpeg re-encoding to H.264... {output_temp_path}")
             # -y overwrites, -vcodec libx264 enforces proper browser support
             subprocess.run([
                 'ffmpeg', '-y', '-i', output_temp_path,

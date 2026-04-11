@@ -44,10 +44,14 @@ class FootballTracker:
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
             if not out.isOpened():
                 raise Exception("avc1 failed")
-        except:
-            print("Warning: avc1 initialization failed. mp4v may not play in web browsers. Please install openh264.")
+        except Exception as e:
+            print(f"DEBUG: avc1 initialization failed: {e}. Falling back to mp4v.")
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+            if not out.isOpened():
+                print("CRITICAL: Even mp4v fallback failed! Using MJPG as last resort.")
+                fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+                out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
         # --- Homography Setup (Standard 105m x 68m pitch) ---
         src_pts = np.array([
@@ -264,6 +268,9 @@ class FootballTracker:
 
             out.write(frame)
             current_frame += 1
+
+            if current_frame % 50 == 0:
+                print(f"Pipeline Progress: Frame {current_frame}/{total_frames} ({int(current_frame/total_frames*100)}%)")
 
             if update_progress_callback and current_frame % max(1, total_frames // 20) == 0:
                 update_progress_callback(int((current_frame / total_frames) * 100))
