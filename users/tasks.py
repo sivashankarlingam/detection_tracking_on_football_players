@@ -56,21 +56,15 @@ def process_video_task(analysis_id):
                         else:
                             break
 
-        # ── Download Cloudinary input video to a local temp file ─────────────
-        # cv2.VideoCapture() cannot open HTTP/HTTPS URLs directly — it must
-        # receive a local filesystem path. We download the Cloudinary video
-        # to a temp file and pass that path to the AI pipeline instead.
-        import urllib.request
-        input_url = analysis.input_video.url
-        input_ext = os.path.splitext(input_url.split('?')[0])[-1] or '.mp4'
-        input_temp_path = os.path.join(temp_dir, f"input_{analysis_id}{input_ext}")
+        # ── Access local input video file ─────────────
+        # The input video is saved locally in MEDIA_ROOT by FileSystemStorage during upload.
+        # We can bypass Cloudinary entirely and read it directly from disk!
+        input_local_path = os.path.join(settings.MEDIA_ROOT, analysis.input_video.name)
 
-        print(f"Downloading input video from Cloudinary: {input_url}")
-        urllib.request.urlretrieve(input_url, input_temp_path)
-        print(f"Downloaded to temp path: {input_temp_path}")
+        print(f"Using local input video: {input_local_path}")
 
-        # Run the AI pipeline using the local temp file
-        tracker.process_video(input_temp_path, output_temp_path, update_progress)
+        # Run the AI pipeline using the local file
+        tracker.process_video(input_local_path, output_temp_path, update_progress)
 
         # Update final state - Upload processed video to cloudinary
         analysis = VideoAnalysis.objects.get(id=analysis_id)
@@ -89,11 +83,9 @@ def process_video_task(analysis_id):
         analysis.status = 'Completed'
         analysis.save()
         
-        # Clean up both temporary files to save space
+        # Clean up temporary output file to save space
         if os.path.exists(output_temp_path):
             os.remove(output_temp_path)
-        if os.path.exists(input_temp_path):
-            os.remove(input_temp_path)
             
         print(f"Video {analysis_id} processing completed.")
 
