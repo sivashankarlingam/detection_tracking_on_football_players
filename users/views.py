@@ -138,7 +138,6 @@ def upload_video(request):
         return redirect('UserLogin')
 
     if request.method == 'POST' and request.FILES.get('video'):
-    if request.method == 'POST' and request.FILES.get('video'):
         uploaded_file = request.FILES['video']
         user = UserRegistrationModel.objects.get(id=request.session['id'])
         
