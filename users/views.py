@@ -189,18 +189,33 @@ def result(request, analysis_id):
         except Exception:
             context_user = None
 
-        def fix_cloudinary_url(field):
+        import cloudinary.utils
+
+        def get_cloudinary_video_url(field):
             if not field or not field.name:
                 return ''
-            url = field.url
-            # Cloudinary storage package defaults to image URLs, but we explicitly uploaded these as videos.
-            if '/image/upload/' in url:
-                url = url.replace('/image/upload/', '/video/upload/')
+            
+            name = str(field.name)
+            # If for some reason it's already a full URL, use it
+            if name.startswith('http'):
+                url = name
+            else:
+                # Force Cloudinary to generate a video-specific secure link
+                url, _ = cloudinary.utils.cloudinary_url(
+                    name, 
+                    resource_type="video", 
+                    secure=True
+                )
+            
+            # Force the .mp4 extension so HTML5 <video> elements accept the MIME type
+            if '/video/' in url and not url.split('?')[0].endswith('.mp4'):
+                url += '.mp4'
+            
             return url
 
         context = {
-            'video_url':          fix_cloudinary_url(analysis.output_video),
-            'original_video_url': fix_cloudinary_url(analysis.input_video),
+            'video_url':          get_cloudinary_video_url(analysis.output_video),
+            'original_video_url': get_cloudinary_video_url(analysis.input_video),
             'status':      analysis.status,
             'progress':    analysis.progress,
             'analysis_id': analysis.id,
@@ -212,13 +227,19 @@ def result(request, analysis_id):
         if analysis.status == 'Completed':
             try:
                 import urllib.request
-                # We fetch the JSON data that was uploaded as 'raw' in tasks.py
-                metrics_url = f"https://res.cloudinary.com/dgf0nhyaf/raw/upload/v1/videos/metrics/metrics_{analysis.id}.json"
+                import json
+                # We fetch the JSON data natively via the Cloudinary SDK utility
+                json_public_id = f"videos/metrics/metrics_{analysis.id}.json"
+                metrics_url, _ = cloudinary.utils.cloudinary_url(
+                    json_public_id,
+                    resource_type="raw",
+                    secure=True
+                )
                 req = urllib.request.urlopen(metrics_url)
                 if req.getcode() == 200:
                     metrics = json.loads(req.read())
             except Exception as e:
-                print(f"DEBUG: Could not load JSON metrics from Cloudinary: {e}")
+                print(f"DEBUG: Could not load JSON metrics from Cloudinary at {metrics_url if 'metrics_url' in locals() else 'unknown'}: {e}")
 
         speeds      = metrics.get('player_speeds',    {})
         distances   = metrics.get('player_distances', {})
