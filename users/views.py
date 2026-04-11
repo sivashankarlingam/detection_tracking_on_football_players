@@ -189,27 +189,36 @@ def result(request, analysis_id):
         except Exception:
             context_user = None
 
+        def fix_cloudinary_url(field):
+            if not field or not field.name:
+                return ''
+            url = field.url
+            # Cloudinary storage package defaults to image URLs, but we explicitly uploaded these as videos.
+            if '/image/upload/' in url:
+                url = url.replace('/image/upload/', '/video/upload/')
+            return url
+
         context = {
-            'video_url':          analysis.output_video.url if analysis.output_video else '',
-            'original_video_url': analysis.input_video.url  if analysis.input_video  else '',
+            'video_url':          fix_cloudinary_url(analysis.output_video),
+            'original_video_url': fix_cloudinary_url(analysis.input_video),
             'status':      analysis.status,
             'progress':    analysis.progress,
             'analysis_id': analysis.id,
             'logged_in_user': context_user,
         }
 
-        # Safely try to load JSON metrics from the local temp directory
+        # Load JSON metrics from Cloudinary (survives container restarts)
         metrics = {}
         if analysis.status == 'Completed':
             try:
-                # The pipeline saves the metrics next to the output video in the local temp directory
-                temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
-                json_path = os.path.join(temp_dir, f"output_{analysis.id}_metrics.json")
-                if os.path.exists(json_path):
-                    with open(json_path, 'r') as f:
-                        metrics = json.load(f)
+                import urllib.request
+                # We fetch the JSON data that was uploaded as 'raw' in tasks.py
+                metrics_url = f"https://res.cloudinary.com/dgf0nhyaf/raw/upload/v1/videos/metrics/metrics_{analysis.id}.json"
+                req = urllib.request.urlopen(metrics_url)
+                if req.getcode() == 200:
+                    metrics = json.loads(req.read())
             except Exception as e:
-                print(f"DEBUG: Could not load JSON metrics locally: {e}")
+                print(f"DEBUG: Could not load JSON metrics from Cloudinary: {e}")
 
         speeds      = metrics.get('player_speeds',    {})
         distances   = metrics.get('player_distances', {})

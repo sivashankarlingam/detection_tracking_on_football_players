@@ -109,15 +109,29 @@ def process_video_task(analysis_id):
         )
         analysis.output_video.name = output_upload_data['public_id']
 
+        # 3. Upload Metrics JSON to Cloudinary (raw resource)
+        # We do this because Hugging Face ephemeral containers restart and wipe local files.
+        json_path = output_temp_path.rsplit('.', 1)[0] + "_metrics.json"
+        if os.path.exists(json_path):
+            print("Uploading metrics JSON to Cloudinary...")
+            upload(
+                json_path,
+                resource_type="raw",
+                public_id=f"metrics_{analysis_id}.json",
+                folder="videos/metrics/"
+            )
+
         analysis.progress = 100
         analysis.status = 'Completed'
         analysis.save()
         
-        # Clean up both local files to save space
+        # Clean up both local files and JSON to save space
         if os.path.exists(output_temp_path):
             os.remove(output_temp_path)
         if os.path.exists(input_local_path):
             os.remove(input_local_path)
+        if os.path.exists(json_path):
+            os.remove(json_path)
             
         print(f"Video {analysis_id} processing and upload completed.")
 
