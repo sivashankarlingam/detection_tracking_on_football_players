@@ -9,8 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # ── Security ──────────────────────────────────────────────────────────────────
-SECRET_KEY = 'django-insecure-wi-e(!&akyw1gh%i*b(-8u8e_%7_1ax3$lzy2_1-m@qg5v-!w$'
-DEBUG = True
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-wi-e(!&akyw1gh%i*b(-8u8e_%7_1ax3$lzy2_1-m@qg5v-!w$')
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '*']
 
 # FIX: CSRF_TRUSTED_ORIGINS is required for Hugging Face Spaces / iframe deployments
@@ -84,6 +84,11 @@ DATABASES = {
     )
 }
 
+# Fix: If using Supabase Connection Pooler (typically port 6543) or transaction mode,
+# we must disable server-side cursors to prevent PgBouncer prepared statement errors.
+if DATABASES.get('default') and DATABASES['default'].get('ENGINE') == 'django.db.backends.postgresql':
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
+
 
 # ── Password validation ───────────────────────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
@@ -115,9 +120,9 @@ WHITENOISE_MANIFEST_STRICT = False
 # ── Media files ───────────────────────────────────────────────────────────────
 # Cloudinary Storage Configuration
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dgf0nhyaf',
-    'API_KEY': '435631362239581',
-    'API_SECRET': 'sF6fdT9PEeazvuFSxsqLeRQEjyk',
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dgf0nhyaf'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '435631362239581'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'sF6fdT9PEeazvuFSxsqLeRQEjyk'),
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

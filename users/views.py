@@ -14,7 +14,6 @@ from .ai_pipeline import FootballTracker
 
 # Global model initialization for live frames to prevent lag
 global_tracker = FootballTracker()
-global_tracker.initialize_model()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Helper
@@ -319,6 +318,7 @@ def process_live_frame(request):
         ball_detected = False
 
         # Use the globally initialized tracker to prevent huge lag on every POST
+        global_tracker.initialize_model()
         if global_tracker.model is not None:
             results = global_tracker.model.track(frame, persist=False, classes=[0, 32], verbose=False)
             if results and results[0].boxes:
